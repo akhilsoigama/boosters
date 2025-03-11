@@ -8,9 +8,9 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 const BottomNavbar = () => {
   const menuItems = [
     { text: 'Home', icon: <Home />, link: '/' },
-    { text: 'Friends', icon: <People />, link: '/friends' },
+    { text: 'Friends', icon: <People />, link: '' },
     { text: 'create post', icon: <AddCircleIcon className='text-3xl'/>, link: '/pages/createPost' },
-    { text: 'Settings', icon: <Settings />, link: '/settings' },
+    { text: 'Settings', icon: <Settings />, link: '' },
     { text: 'Profile', icon: <AccountBoxIcon />, link: '/pages/profile' },
   ];
 

@@ -20,10 +20,10 @@ const Sidebar = () => {
 
   const menuItems = [
     { text: 'Home', icon: <Home />, link: '/' },
-    { text: 'Friends', icon: <People />, link: '/friends' },
+    { text: 'Friends', icon: <People />, link: '' },
     { text: 'Create Post', icon: <AddCircleIcon />, link: '/pages/createPost' },
-    { text: 'Messages', icon: <Mail />, link: '/messages' },
-    { text: 'Settings', icon: <Settings />, link: '/settings' },
+    { text: 'Messages', icon: <Mail />, link: '' },
+    { text: 'Settings', icon: <Settings />, link: '' },
   ];
 
   return (
