@@ -39,7 +39,6 @@ const getUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
     res.json({ user });
   } catch (error) {
     res.status(401).json({ message: 'Invalid or expired token' });
@@ -48,13 +47,16 @@ const getUser = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   const user = await User.find();
+  
   if (user) {
     res.status(200).json(user)
   }
 }
 
 const getUserId = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params; 
+  console.log(id); 
+
   try {
     const user = await User.findById(id);
 

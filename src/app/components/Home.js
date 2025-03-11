@@ -1,58 +1,52 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardHeader, Avatar, CardContent, Typography, CardActions, IconButton } from '@mui/material';
+import { Card, CardHeader, Avatar, CardContent, CardActions, IconButton } from '@mui/material';
 import { Favorite, Share, MoreVert } from '@mui/icons-material';
 import axios from 'axios';
-import ReactMarkdown from 'react-markdown';
-import TurndownService from 'turndown';
+import MarkdownPreview from '../pages/common/MarkdownPreview';
 import { useUser } from '../contaxt/userContaxt';
-import Image from 'next/image';
+import { toast } from 'sonner';
 
 const HomePage = () => {
     const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const baseUrl = process.env.NEXT_PUBLIC_HOST;
     const { user } = useUser();
-    const firstLetter = user?.fullName?.charAt(0).toUpperCase() || 'U';
+
     const fetchPosts = async () => {
         try {
             const response = await axios.get(`${baseUrl}/api/create-post`, {
                 params: {
-                    User_Id: user._id, 
+                    User_Id: user._id,
                 },
             });
-            console.log(response.config.params)
-            if (response.data) {
-                const data = response.data;
-                if (data.length > 0) {
-                    setPosts(data); 
-                }
+
+            if (response.data?.length > 0) {
+                const postsWithUserData = await Promise.all(
+                    response.data.map(async (post) => {
+                        const userResponse = await axios.get(`${baseUrl}/api/users/${post.User_id}`);
+                        return { ...post, userData: userResponse.data };
+                    })
+                );
+                setPosts(postsWithUserData);
             }
         } catch (error) {
-            console.error('Error fetching posts:', error);
+            toast.error('Error fetching posts:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
         if (user?._id) {
-            fetchPosts(); 
+            fetchPosts();
         }
     }, [user]);
 
-    const turndownService = new TurndownService();
-    const convertHtmlToMarkdown = (html) => {
-        return turndownService.turndown(html);
-    };
-
-    const MarkdownPreview = ({ content }) => {
-        const markdownContent = convertHtmlToMarkdown(content);
-
-        return (
-            <div className="mt-4 p-4 rounded-lg prose dark:prose-invert">
-                <ReactMarkdown>{markdownContent}</ReactMarkdown>
-            </div>
-        );
-    };
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <div className="min-h-screen p-6 pt-20 w-full flex justify-center bg-gray-50 dark:bg-gray-900">
@@ -69,11 +63,11 @@ const HomePage = () => {
                             <CardHeader
                                 avatar={
                                     <Avatar
-                                        src={firstLetter}
-                                        alt={firstLetter}
+                                        src={post.userData?.fullName}
+                                        alt={post.userData?.fullName}
                                         className="bg-blue-500 dark:bg-blue-700"
                                     >
-                                        {firstLetter.charAt(0)}
+                                        {post.userData?.fullName?.charAt(0) || 'U'}
                                     </Avatar>
                                 }
                                 action={
@@ -81,16 +75,18 @@ const HomePage = () => {
                                         <MoreVert />
                                     </IconButton>
                                 }
-                                title={<span className="dark:text-white">{user?user.fullName.toUpperCase():'U'}</span>}
-                                subheader={<span className="dark:text-gray-400">{user?user.email:null}</span>}
+                                title={<span className="dark:text-white">{post.userData?.fullName || 'Unknown User'}</span>}
+                                subheader={<span className="dark:text-gray-400">{post.userData?.email || ''}</span>}
                                 className="bg-blue-50 dark:bg-gray-700 italic"
                             />
                             <CardContent className="w-full flex justify-center">
                                 <img
-                                    src={post.image}
-                                    alt={post.title}
-                               
+                                    src={post.image || '/path/to/fallback/image.jpg'}
+                                    alt={post.title || 'Post image'}
                                     className="w-xl h-auto rounded-md"
+                                    onError={(e) => {
+                                        e.target.src = '/path/to/fallback/image.jpg';
+                                    }}
                                 />
                             </CardContent>
                             <CardContent className="h-60 overflow-y-auto w-full">
