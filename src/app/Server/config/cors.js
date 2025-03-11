@@ -1,6 +1,6 @@
 const cors = require('cors');
 
-const allowedOrigins = ['https://booster-ebon.vercel.app', 'http://localhost:3000'];
+const allowedOrigins = ['https://boosters-sooty.vercel.app', 'http://localhost:3000'];
 
 const corsOptions = {
   origin: (origin, callback) => {
