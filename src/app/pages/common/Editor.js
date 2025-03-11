@@ -35,6 +35,7 @@ const TiptapEditor = ({ onChange, value}) => {
 
   return (
     <div className="w-full">
+      Content
       <EditorProvider
         name='content'
         slotBefore={<MenuBar />}

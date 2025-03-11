@@ -39,7 +39,7 @@ const SignupPage = () => {
       }
       reset();
     } catch (error) {
-      console.error('Signup failed:', error);
+      toast.error('Signup failed:', error);
     }
   };
 

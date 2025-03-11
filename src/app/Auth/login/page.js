@@ -50,7 +50,6 @@ const LoginForm = () => {
         reset();
       }
     } catch (error) {
-      console.error('Login error:', error);
       if (error.response) {
         toast.error(error.response.data.message || 'Login failed. Please try again.');
       } else if (error.request) {

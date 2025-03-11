@@ -4,21 +4,27 @@ require('dotenv').config();
 
 const secretKey = process.env.JWT_SECRET || 'b51f875acb0d1098039b355d07063203175d1da813df2e8bde478c1f842e06e7';
 
+
 const checkAuth = (req, res) => {
   const token = req.cookies.token;
 
-  if (token) {
-    try {
-      const decoded = jwt.verify(token, secretKey);
-      res.json({ isLoggedIn: true });
-    } catch (error) {
-      res.json({ isLoggedIn: false });
+  if (!token) {
+    return res.status(401).json({ isLoggedIn: false, message: 'No token provided' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, secretKey);
+    res.status(200).json({ isLoggedIn: true, userId: decoded.userId });
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      res.status(401).json({ isLoggedIn: false, message: 'Token expired' });
+    } else if (error.name === 'JsonWebTokenError') {
+      res.status(401).json({ isLoggedIn: false, message: 'Invalid token' });
+    } else {
+      res.status(500).json({ isLoggedIn: false, message: 'Internal server error' });
     }
-  } else {
-    res.json({ isLoggedIn: false });
   }
 };
-
 const getUser = async (req, res) => {
   const token = req.cookies.token;
 
@@ -40,6 +46,13 @@ const getUser = async (req, res) => {
   }
 };
 
+const getAllUsers = async (req, res) => {
+  const user = await User.find();
+  if (user) {
+    res.status(200).json(user)
+  }
+}
+
 const getUserId = async (req, res) => {
   const { id } = req.params;
   try {
@@ -55,4 +68,4 @@ const getUserId = async (req, res) => {
   }
 };
 
-module.exports = { checkAuth, getUser, getUserId };
+module.exports = { checkAuth, getUser, getUserId, getAllUsers };

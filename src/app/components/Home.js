@@ -21,13 +21,13 @@ const HomePage = () => {
                     User_Id: user._id, 
                 },
             });
+            console.log(response.config.params)
             if (response.data) {
                 const data = response.data;
                 if (data.length > 0) {
                     setPosts(data); 
                 }
             }
-            console.log(response)
         } catch (error) {
             console.error('Error fetching posts:', error);
         }
@@ -81,8 +81,8 @@ const HomePage = () => {
                                         <MoreVert />
                                     </IconButton>
                                 }
-                                title={<span className="dark:text-white">{user.fullName.toUpperCase()}</span>}
-                                subheader={<span className="dark:text-gray-400">{user.email}</span>}
+                                title={<span className="dark:text-white">{user?user.fullName.toUpperCase():'U'}</span>}
+                                subheader={<span className="dark:text-gray-400">{user?user.email:null}</span>}
                                 className="bg-blue-50 dark:bg-gray-700 italic"
                             />
                             <CardContent className="w-full flex justify-center">
