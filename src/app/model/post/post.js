@@ -15,11 +15,15 @@ const userSchema = new mongoose.Schema({
   },
   image: {
     type: String,
-    require: true,
+    required: true,
   },
   User_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'post'
+    ref: 'post',
+  },
+  tags: {
+    type: [String],
+    require: true
   }
 });
 

@@ -5,20 +5,19 @@ import { Controller } from 'react-hook-form';
 
 const AuthorField = ({ control, errors }) => {
     return (
-        <div className="mb-6">
+        <div className="mb-6">                    
             <Controller
                 name="auther"
                 control={control}
                 defaultValue=""
-                rules={{ required: 'Auter is required' }}
                 render={({ field }) => (
                     <TextField
                         {...field}
-                        label="Auther"
+                        label="Author"
                         variant="outlined"
                         fullWidth
-                        error={!!errors.auter}
-                        helperText={errors.auter ? errors.auter.message : ''}
+                        error={!!errors.auther}
+                        helperText={errors.auther ? errors.auther.message : ''}
                         className="rounded-lg dark:bg-gray-800 dark:text-white dark:border-gray-700"
                         InputProps={{
                             className: 'dark:text-white',
