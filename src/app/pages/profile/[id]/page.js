@@ -1,7 +1,7 @@
 import { UserProvider } from '@/app/contaxt/userContaxt'
-import UserProfile from './profile'
 import Sidebar from '@/app/components/Sidebar'
 import BottomNavbar from '@/app/components/BottomNavbar'
+import UserProfile from '../profile'
 
 const page = () => {
   return (
