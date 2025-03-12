@@ -25,6 +25,8 @@ export function DropdownMenuDemo() {
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
     const firstLetter = user ? user.fullName.charAt(0).toUpperCase() : '';
+    const userId = user ? user._id:''
+    console.log(userId)
 
     return (
         <>
@@ -40,7 +42,7 @@ export function DropdownMenuDemo() {
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={()=>route.push('/pages/profile')}>
+                        <DropdownMenuItem onClick={() => route.push(`/pages/profile/${userId}`)}>
                             Profile
                             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                         </DropdownMenuItem>
