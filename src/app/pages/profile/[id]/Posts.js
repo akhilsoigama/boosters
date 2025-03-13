@@ -4,23 +4,16 @@ import { motion } from 'framer-motion';
 import { Card, CardHeader, Avatar, CardContent, CardActions, IconButton, Skeleton } from '@mui/material';
 import { Favorite, Share, MoreVert } from '@mui/icons-material';
 import axios from 'axios';
-import MarkdownPreview from '../pages/common/MarkdownPreview';
-import { useUser } from '../contaxt/userContaxt';
 import { toast } from 'sonner';
+import { useUser } from '@/app/contaxt/userContaxt';
+import MarkdownPreview from '../../common/MarkdownPreview';
 
-const HomePage = () => {
+const Posts = ({params}) => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const baseUrl = process.env.NEXT_PUBLIC_HOST;
     const { user } = useUser();
-
-    const shuffleArray = (array) => {
-        array.forEach((_, i) => {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        });
-        return array;
-    };
+   
     const fetchPosts = async () => {
         try {
             const response = await axios.get(`${baseUrl}/api/create-post`, {
@@ -36,7 +29,7 @@ const HomePage = () => {
                         return { ...post, userData: userResponse.data };
                     })
                 );
-                setPosts(shuffleArray(postsWithUserData));
+                setPosts(postsWithUserData);
             }
         } catch (error) {
             toast.error('Error fetching posts:', error);
@@ -53,7 +46,7 @@ const HomePage = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen p-6 pt-20 w-full flex justify-center bg-gray-50 dark:bg-gray-900">
+            <div className="min-h-screen p-6 pt-20 w-full flex justify-center">
                 <div className="space-y-6 max-w-md lg:max-w-2xl grid grid-cols-1 place-items-center">
                     {[...Array(3)].map((_, i) => (
                         <motion.div
@@ -94,7 +87,7 @@ const HomePage = () => {
     }
 
     return (
-        <div className="min-h-screen p-6 pt-20 w-full flex justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-screen p-6 pt-20 w-full flex justify-center ">
             <div className="space-y-6 max-w-md lg:max-w-2xl grid grid-cols-1 place-items-center">
                 {posts.map((post, i) => (
                     <motion.div
@@ -153,4 +146,4 @@ const HomePage = () => {
     );
 };
 
-export default HomePage;
+export default Posts;

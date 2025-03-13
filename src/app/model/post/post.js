@@ -21,10 +21,10 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'post',
   },
-  tags: {
-    type: [String],
-    require: true
-  }
+  // tags: {
+  //   type: [String],
+  //   require: true,
+  // }
 });
 
 const Post = mongoose.models.posts || mongoose.model('posts', userSchema);
