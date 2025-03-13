@@ -72,7 +72,6 @@ const UserProfile = () => {
                     </Button>
                 </div>
             </div>
-
         </motion.div>
     );
 };

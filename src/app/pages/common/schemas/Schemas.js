@@ -12,8 +12,8 @@ const PostSchemas = z.object({
     .string()
     .min(1, "Content is required")
     .min(100, "Content must be at least 100 characters"),
-  tags: z
-    .array(z.string().min(1, "Tag cannot be empty"))
+  // tags: z
+  //   .array(z.string().min(1, "Tag cannot be empty"))
 });
 
 module.exports = { PostSchemas };

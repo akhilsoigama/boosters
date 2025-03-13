@@ -26,7 +26,6 @@ export function DropdownMenuDemo() {
 
     const firstLetter = user ? user.fullName.charAt(0).toUpperCase() : '';
     const userId = user ? user._id:''
-    console.log(userId)
 
     return (
         <>
