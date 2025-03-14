@@ -36,5 +36,13 @@ export const bounceText = {
   hidden: { y: -20 }, 
   visible: { y: 0, transition: { type: 'spring', stiffness: 120 } },
 };
+export const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
 
+export const fieldVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
+};
 export const MotionDiv = motion.div;

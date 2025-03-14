@@ -3,8 +3,10 @@ import { Typography, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
 import { useUser } from '../../contaxt/userContaxt';
+import { useRouter } from 'next/navigation';
 
 const UserProfile = () => {
+    const router = useRouter()
     const { user } = useUser();
     const firstLetter = user?.fullName?.charAt(0).toUpperCase() || 'U';
     return (
@@ -66,7 +68,7 @@ const UserProfile = () => {
                         fullWidth
                         variant="outlined"
                         className="border-blue-500 w-32 text-blue-500 hover:bg-blue-50"
-
+                        onClick={()=>router.push(`/pages/editprofile/${user?user.fullName:''}`)}
                     >
                         Edit profile
                     </Button>

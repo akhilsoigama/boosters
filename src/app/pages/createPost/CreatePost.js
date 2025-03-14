@@ -44,9 +44,9 @@ const PostForm = () => {
   };
 
   return (
-    <Box className="max-w-full mx-auto rounded-lg shadow-lg">
+    <Box className="max-w-full mx-auto rounded-lg p-4 mb-10 shadow-lg">
       <div className='w-full mt-5  mb-4'>
-        <button onClick={() => router.push('/')} className='hidden md:flex shadow-md px-8 '><ReplyIcon />Back</button>
+        <button onClick={() => router.push('/')} className='hidden md:flex dark:shadow-md px-8 '><ReplyIcon />Back</button>
       </div>
       <div className='w-full '>
         <Typography
