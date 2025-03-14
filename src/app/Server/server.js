@@ -7,6 +7,7 @@ const userRoutes = require('./routes/userRoutes');
 const connectDB = require('../lib/connection');
 const postRouter = require('./routes/postRoute');
 const middelwareRoutes = require('./routes/middelwareRoutes');
+const profileRouter = require('./routes/profileRoute');
 require('dotenv').config();
 
 const app = express();
@@ -21,6 +22,8 @@ app.use(middelwareRoutes)
 app.use('/api', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api', postRouter);
+app.use('/api', profileRouter);
+
 
 app.get('/', (req, res) => {
   res.send('<h1>This is the home page</h1>');

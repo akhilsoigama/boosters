@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardHeader, Avatar, CardContent, CardActions, IconButton, Skeleton } from '@mui/material';
 import { Favorite, Share, MoreVert } from '@mui/icons-material';
@@ -8,12 +8,12 @@ import { toast } from 'sonner';
 import { useUser } from '@/app/contaxt/userContaxt';
 import MarkdownPreview from '../../common/MarkdownPreview';
 
-const Posts = ({params}) => {
+const Posts = ({ ids }) => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const baseUrl = process.env.NEXT_PUBLIC_HOST;
     const { user } = useUser();
-   
+
     const fetchPosts = async () => {
         try {
             const response = await axios.get(`${baseUrl}/api/create-post`, {
@@ -21,7 +21,6 @@ const Posts = ({params}) => {
                     User_Id: user._id,
                 },
             });
-
             if (response.data?.length > 0) {
                 const postsWithUserData = await Promise.all(
                     response.data.map(async (post) => {
@@ -29,7 +28,9 @@ const Posts = ({params}) => {
                         return { ...post, userData: userResponse.data };
                     })
                 );
-                setPosts(postsWithUserData);
+                const filteredPosts = postsWithUserData.filter(post => post.User_id === ids);
+                
+                setPosts(filteredPosts);
             }
         } catch (error) {
             toast.error('Error fetching posts:', error);
@@ -42,12 +43,12 @@ const Posts = ({params}) => {
         if (user?._id) {
             fetchPosts();
         }
-    }, [user]);
+    }, [user, ids]); 
 
     if (loading) {
         return (
             <div className="min-h-screen p-6 pt-20 w-full flex justify-center">
-                <div className="space-y-6 max-w-md lg:max-w-2xl grid grid-cols-1 place-items-center">
+                <div className="space-y-6 max-w-md lg:max-w-2xl grid grid-cols-1  place-items-center">
                     {[...Array(3)].map((_, i) => (
                         <motion.div
                             key={i}
@@ -88,21 +89,19 @@ const Posts = ({params}) => {
 
     return (
         <div className="min-h-screen p-6 pt-20 w-full flex justify-center ">
-            <div className="space-y-6 max-w-md lg:max-w-2xl grid grid-cols-1 place-items-center">
+            <div className="space-y-6 max-w-md lg:max-w-2xl grid gap-3  place-items-center">
                 {posts.map((post, i) => (
                     <motion.div
                         key={i}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: i * 0.1 }}
-                        className="w-full"
+                        className="w-full "
                     >
-                        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 dark:bg-gray-800 dark:text-white">
+                        <Card className="shadow-lg  hover:shadow-xl transition-shadow duration-300 dark:bg-gray-800 dark:text-white">
                             <CardHeader
                                 avatar={
                                     <Avatar
-                                        // src={post.userData?.fullName}
-                                        // alt={post.userData?.fullName}
                                         className="bg-blue-500 dark:bg-blue-700"
                                     >
                                         {post.userData?.fullName?.charAt(0).toUpperCase() || 'U'}
