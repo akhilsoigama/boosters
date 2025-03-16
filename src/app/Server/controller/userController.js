@@ -4,9 +4,9 @@ require('dotenv').config();
 
 const secretKey = process.env.JWT_SECRET || 'b51f875acb0d1098039b355d07063203175d1da813df2e8bde478c1f842e06e7';
 
-
 const checkAuth = (req, res) => {
   const token = req.cookies.token;
+  console.log(token)
 
   if (!token) {
     return res.status(401).json({ isLoggedIn: false, message: 'No token provided' });
@@ -47,16 +47,14 @@ const getUser = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   const user = await User.find();
-  
+
   if (user) {
     res.status(200).json(user)
   }
 }
 
 const getUserId = async (req, res) => {
-  const { id } = req.params; 
-  console.log(id); 
-
+  const { id } = req.params;
   try {
     const user = await User.findById(id);
 
