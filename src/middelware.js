@@ -1,17 +1,13 @@
 import { NextResponse } from 'next/server';
 
-const protectedRoutes = ['/', '/dashboard', '/profile'];
-
-export async function middleware(req) {
-  const { pathname } = req.nextUrl;
-
-  if (protectedRoutes.includes(pathname)) {
+export function middleware(req) {
     const token = req.cookies.get('token')?.value;
-   
-    if (!token) {
-      return NextResponse.redirect(new URL('/Auth/signup', req.url));
-    }
-  }
+    
+    console.log("🚀 Middleware Token:", token);
 
-  return NextResponse.next();
+    if (!token) {
+        return NextResponse.redirect(new URL('/Auth/signup', req.url));
+    }
+
+    return NextResponse.next();
 }
