@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { toast } from 'sonner';
 
 const UserContext = createContext();
 
@@ -13,37 +14,38 @@ export const UserProvider = ({ children }) => {
     const baseUrl = process.env.NEXT_PUBLIC_HOST;
 
     useEffect(() => {
-        const token = Cookies.get('token');
+        checkLoginStatus();
+    }, [baseUrl]);
 
-        if (token) {
-            checkLoginStatus(token);
-        } else {
-            setIsLoggedIn(false);
-            router.push('/Auth/signup');
-        }
-    }, []);
-
-    const checkLoginStatus = async (token) => {
+    const checkLoginStatus = async () => {
         try {
             const response = await axios.get(`${baseUrl}/api/check-auth`, {
                 withCredentials: true,
-                headers: { Authorization: `Bearer ${token}` }
             });
-
+    
+    
             if (response.data.isLoggedIn) {
                 setIsLoggedIn(true);
-                setUser(response.data.user);
+                const userId = response.data.user.id;
+    
+                const userRes = await axios.get(`${baseUrl}/api/users/${userId}`, {
+                    withCredentials: true,
+                });
+    
+                setUser(userRes.data);  
             } else {
                 setIsLoggedIn(false);
+                setUser(null);
                 router.push('/Auth/signup');
             }
         } catch (error) {
-            console.error('Error checking login status:', error);
+            toast.error('Error checking login status:', error);
             setIsLoggedIn(false);
-            router.push('/Auth/signup');
+            setUser(null);
+            router.push('/Auth/login');
         }
     };
-    console.log(user)
+    
     const handleLogout = async () => {
         try {
             await axios.post(`${baseUrl}/api/logout`, {}, { withCredentials: true });
