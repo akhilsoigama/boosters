@@ -33,7 +33,6 @@ const LoginForm = () => {
   });
 
   const baseUrl = process.env.NEXT_PUBLIC_HOST;
-
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
@@ -130,9 +129,9 @@ const LoginForm = () => {
             <MotionDiv variants={slideInUp} className="mt-6 text-center">
               <Typography variant="body2" className="text-gray-600">
                 Don't have an account?{' '}
-                <Link href="/Auth/signup" className="text-blue-500 hover:underline">
+                <Button onClick={()=>router.push('/Auth/signup')} className="text-blue-500 hover:underline">
                   Sign Up
-                </Link>
+                </Button>
               </Typography>
             </MotionDiv>
           </Box>
