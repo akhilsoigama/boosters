@@ -23,7 +23,7 @@ const HomePage = () => {
     };
     const fetchPosts = async () => {
         try {
-            const response = await axios.get(`${baseUrl}/api/create-post`, {
+            const response = await axios.get(`api/post`, {
                 params: {
                     User_Id: user._id,
                 },
@@ -32,7 +32,7 @@ const HomePage = () => {
             if (response.data?.length > 0) {
                 const postsWithUserData = await Promise.all(
                     response.data.map(async (post) => {
-                        const userResponse = await axios.get(`${baseUrl}/api/users/${post.User_id}`);
+                        const userResponse = await axios.get(`api/user/${post.User_id}`);
                         return { ...post, userData: userResponse.data };
                     })
                 );

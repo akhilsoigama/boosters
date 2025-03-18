@@ -30,7 +30,7 @@ const PostForm = () => {
     const postData = { ...data, User_id };
 
     try {
-      const response = await axios.post(`${baseUrl}/api/create-post`, postData);
+      const response = await axios.post(`/api/post`, postData);
 
       if (response.data) {
         toast.success(response.data.message);

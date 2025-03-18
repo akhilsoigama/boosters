@@ -32,16 +32,17 @@ const LoginForm = () => {
     },
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_HOST;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${baseUrl}/api/login`, {
+      const response = await axios.post(`/api/auth/login`, {
         email: data.email,
         password: data.password,
       }, {
         withCredentials: true,
       });
+      
   
       if (response.status === 200) {
         router.push(redirect);
