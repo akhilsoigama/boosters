@@ -7,6 +7,7 @@ if (!secretKey) {
     throw new Error("JWT_SECRET is not set in environment variables.");
 }
 
+
 const getUser = async (req, res) => {
     try {
         const user = await User.findById(req.user.userId).select('-password');
