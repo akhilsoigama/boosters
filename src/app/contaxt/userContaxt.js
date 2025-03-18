@@ -19,7 +19,7 @@ export const UserProvider = ({ children }) => {
 
     const checkLoginStatus = async () => {
         try {
-            const response = await axios.get(`${baseUrl}/api/check-auth`, {
+            const response = await axios.get(`/api/auth/check-auth`, {
                 withCredentials: true,
             });
     
@@ -28,7 +28,7 @@ export const UserProvider = ({ children }) => {
                 setIsLoggedIn(true);
                 const userId = response.data.user.id;
     
-                const userRes = await axios.get(`${baseUrl}/api/users/${userId}`, {
+                const userRes = await axios.get(`/api/user/${userId}`, {
                     withCredentials: true,
                 });
     

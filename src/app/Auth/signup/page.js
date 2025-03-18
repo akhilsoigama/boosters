@@ -27,7 +27,7 @@ const SignupPage = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post(`${baseUrl}/api/signup`, {
+      const response = await axios.post(`/api/auth/signup`, {
         fullName: data.fullName,
         email: data.email,
         password: data.password,
