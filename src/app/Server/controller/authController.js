@@ -1,4 +1,4 @@
-const User = require('../../model/users');
+const User = require('../model/users');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -79,13 +79,13 @@ exports.logout = (req, res) => {
 
   const cookieOptions = {
     httpOnly: true,
-    secure: isProduction, // ✅ Production me true rakho
+    secure: isProduction, 
     sameSite: isProduction ? 'None' : 'Lax',
     path: '/',
 };
 
 if (isProduction) {
-    cookieOptions.domain = '.boosters-sooty.vercel.app'; // ✅ Vercel ke liye domain set karo
+    cookieOptions.domain = '.boosters-sooty.vercel.app'; 
 }
 
 res.clearCookie('token', token, cookieOptions);
