@@ -33,7 +33,7 @@ const SignupPage = () => {
         password: data.password,
       });
       if (response) {
-        
+
         toast.success("signup successfully")
         route.push('/Auth/login')
       }
@@ -136,9 +136,9 @@ const SignupPage = () => {
             >
               <Typography variant="body2" className="text-gray-600">
                 Already have an account?{" "}
-                <Link href="/Auth/login" className="text-blue-500 hover:underline">
+                <Button onClick={() => route.push('/Auth/login')} className="text-blue-500 hover:underline">
                   Log In
-                </Link>
+                </Button>
               </Typography>
             </motion.div>
           </Box>
