@@ -1,21 +1,27 @@
-import Sidebar from '@/app/components/Sidebar'
-import BottomNavbar from '@/app/components/BottomNavbar'
-import UserProfile from '../profile'
-import Posts from './Posts'
-import { use } from 'react'
+'use client';
 
-const page = ({ params }) => {
-  const { id } = use(params)
+import Sidebar from '@/app/components/Sidebar';
+import BottomNavbar from '@/app/components/BottomNavbar';
+import UserProfile from '../profile';
+import Posts from './Posts';
+import { use, useMemo } from 'react';
+
+const Page = ({ params }) => {
+  const {id}= use(params)
+
+  // ✅ Optional: Memoize the posts component
+  const renderedPosts = useMemo(() => <Posts ids={id} />, [id]);
+
   return (
     <div className='relative w-full h-screen'>
-        <div className='w-full flex flex-col'>
-          <Sidebar />
-          <UserProfile />
-          <Posts ids={id}/>
-        </div>
-        <BottomNavbar />
+      <div className='w-full flex flex-col'>
+        <Sidebar />
+        <UserProfile />
+        {renderedPosts}
+      </div>
+      <BottomNavbar />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default Page;

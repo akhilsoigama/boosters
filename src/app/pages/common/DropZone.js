@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
 import imageCompression from 'browser-image-compression';
 import { Typography, Box, IconButton } from '@mui/material';
@@ -9,7 +9,7 @@ const ImageDropZone = ({
     value,
     onChange,
     placeholderText = "Drag & drop an image here, or click to select one",
-    maxSize = 5 * 1024 * 1024, 
+    maxSize = 5 * 1024 * 1024,
 }) => {
     const [image, setImage] = useState(null);
 
@@ -51,7 +51,7 @@ const ImageDropZone = ({
         }
     };
 
-    const { getRootProps, getInputProps } = useDropzone({
+    const dropzoneProps = useMemo(() => ({
         accept: {
             'image/jpeg': ['.jpeg', '.jpg'],
             'image/png': ['.png'],
@@ -61,7 +61,9 @@ const ImageDropZone = ({
         maxSize,
         maxFiles: 1,
         onDrop,
-    });
+    }), [maxSize]);
+
+    const { getRootProps, getInputProps } = useDropzone(dropzoneProps);
 
     useEffect(() => {
         if (!value) {
@@ -77,6 +79,45 @@ const ImageDropZone = ({
         };
     }, [image]);
 
+    const renderPreview = useMemo(() => {
+        if (image) {
+            return (
+                <Box className="w-full text-center">
+                    <Box className="relative">
+                        <img
+                            src={image.preview}
+                            alt="Preview"
+                            className="w-full h-auto md:h-96 object-cover rounded-lg mx-auto"
+                        />
+                        <IconButton
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onChange(null);
+                            }}
+                            className="absolute top-2 right-2 bg-white hover:bg-gray-100"
+                            size="small"
+                        >
+                            <DeleteIcon className="text-red-500" />
+                        </IconButton>
+                    </Box>
+                </Box>
+            );
+        }
+
+        return (
+            <Box>
+                <img
+                    src="https://i.pinimg.com/originals/56/74/51/5674515621e872310e356243db78b14f.gif"
+                    alt="Upload Placeholder"
+                    className="w-full h-32 object-contain"
+                />
+                <Typography variant="body1" className="mt-2 text-gray-500">
+                    {placeholderText}
+                </Typography>
+            </Box>
+        );
+    }, [image, onChange, placeholderText]);
+
     return (
         <Box>
             <Box
@@ -84,38 +125,7 @@ const ImageDropZone = ({
                 className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 transition-colors duration-300"
             >
                 <input {...getInputProps()} />
-                {image ? (
-                    <Box className="w-full text-center">
-                        <Box className="relative">
-                            <img
-                                src={image.preview}
-                                alt="Preview"
-                                className="w-full h-auto md:h-96 object-cover rounded-lg mx-auto"
-                            />
-                            <IconButton
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onChange(null);
-                                }}
-                                className="absolute top-2 right-2 bg-white hover:bg-gray-100"
-                                size="small"
-                            >
-                                <DeleteIcon className="text-red-500" />
-                            </IconButton>
-                        </Box>
-                    </Box>
-                ) : (
-                    <Box>
-                        <img
-                            src="https://i.pinimg.com/originals/56/74/51/5674515621e872310e356243db78b14f.gif"
-                            alt="Upload Placeholder"
-                            className="w-full h-32 object-contain"
-                        />
-                        <Typography variant="body1" className="mt-2 text-gray-500">
-                            {placeholderText}
-                        </Typography>
-                    </Box>
-                )}
+                {renderPreview}
             </Box>
         </Box>
     );

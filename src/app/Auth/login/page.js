@@ -1,6 +1,6 @@
 'use client';
-import React, { useState, Suspense } from 'react';
-import { Button, Typography, Container, Box, Link } from '@mui/material';
+import React, { useState, Suspense, useMemo } from 'react';
+import { Button, Typography, Container, Box } from '@mui/material';
 import { LockOutlined } from '@mui/icons-material';
 import { fadeIn, slideInUp, MotionDiv } from '../../components/motion/motion';
 import FormController from '../common/FormController';
@@ -15,14 +15,17 @@ import { useRouter, useSearchParams } from 'next/navigation';
 const LoginForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/'; 
 
-  const [isLoading, setIsLoading] = useState(false); 
+  // Memoize redirect URL and base URL
+  const redirect = useMemo(() => searchParams.get('redirect') || '/', [searchParams]);
+  const baseUrl = useMemo(() => process.env.NEXT_PUBLIC_API_URL, []);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     control,
-    handleSubmit, 
-    formState: { errors },   
+    handleSubmit,
+    formState: { errors },
     reset,
   } = useForm({
     resolver: zodResolver(LoginSchema),
@@ -32,7 +35,6 @@ const LoginForm = () => {
     },
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
@@ -42,8 +44,7 @@ const LoginForm = () => {
       }, {
         withCredentials: true,
       });
-      
-  
+
       if (response.status === 200) {
         router.push(redirect);
         toast.success('Login successfully');
@@ -119,7 +120,7 @@ const LoginForm = () => {
                     variant="contained"
                     className="bg-blue-500 hover:bg-blue-600 text-white py-3"
                     type="submit"
-                    disabled={isLoading} 
+                    disabled={isLoading}
                   >
                     {isLoading ? 'Logging in...' : 'Log In'}
                   </Button>
@@ -130,7 +131,7 @@ const LoginForm = () => {
             <MotionDiv variants={slideInUp} className="mt-6 text-center">
               <Typography variant="body2" className="text-gray-600">
                 Don't have an account?{' '}
-                <Button onClick={()=>router.push('/Auth/signup')} className="text-blue-500 hover:underline">
+                <Button onClick={() => router.push('/Auth/signup')} className="text-blue-500 hover:underline">
                   Sign Up
                 </Button>
               </Typography>
@@ -150,4 +151,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;  
+export default LoginPage;

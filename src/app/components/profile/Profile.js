@@ -16,16 +16,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogoutModal } from "./LogoutModel";
 import { useUser } from "@/app/contaxt/userContaxt";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 export function DropdownMenuDemo() {
-    const route = useRouter()
+    const route = useRouter();
     const { isLoggedIn, user, handleLogout } = useUser();
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-    const firstLetter = user ? user.fullName.charAt(0).toUpperCase() : '';
-    const userId = user ? user._id:''
+    const firstLetter = useMemo(() => {
+        return user ? user.fullName.charAt(0).toUpperCase() : '';
+    }, [user]);
+
+    const userId = useMemo(() => {
+        return user ? user._id : '';
+    }, [user]);
 
     return (
         <>

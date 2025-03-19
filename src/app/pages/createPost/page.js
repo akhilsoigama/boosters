@@ -1,20 +1,21 @@
-'use client'
-import React from 'react'
-import CreatePost from './CreatePost'
-import { UserProvider } from '@/app/contaxt/userContaxt'
-import Sidebar from '@/app/components/Sidebar'
-import BottomNavbar from '@/app/components/BottomNavbar'
+'use client';
+import React, { useMemo } from 'react';
+import CreatePost from './CreatePost';
+import Sidebar from '@/app/components/Sidebar';
+import BottomNavbar from '@/app/components/BottomNavbar';
 
-const page = () => {
+const Page = () => {
+  const createPostMemo = useMemo(() => <CreatePost />, []);
+
   return (
     <div className='relative w-full h-screen'>
-      <div className='w-full flex '>
+      <div className='w-full flex'>
         {/* <Sidebar /> */}
-        <CreatePost/>
+        {createPostMemo}
       </div>
       <BottomNavbar />
-  </div>
-  )
-}
+    </div>
+  );
+};
 
-export default page
+export default Page;

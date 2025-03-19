@@ -1,5 +1,5 @@
 'use client'
-import React from "react";
+import React, { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Typography, Container, Box, Link } from "@mui/material";
 import { LockOutlined } from "@mui/icons-material";
@@ -13,17 +13,19 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const SignupPage = () => {
-  const route = useRouter()
+  const route = useRouter();
+
+  const defaultValues = useMemo(() => ({
+    email: "",
+    password: "",
+    fullName: '',
+    confirmPassword: ''
+  }), []);
+
   const { control, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: zodResolver(SignUpSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      fullName: '',
-      confirmPassword: ''
-    },
+    defaultValues,
   });
-  const baseUrl = process.env.NEXT_PUBLIC_HOST
 
   const onSubmit = async (data) => {
     try {
@@ -33,9 +35,8 @@ const SignupPage = () => {
         password: data.password,
       });
       if (response) {
-
-        toast.success("signup successfully")
-        route.push('/Auth/login')
+        toast.success("Signup successfully");
+        route.push('/Auth/login');
       }
       reset();
     } catch (error) {
@@ -51,24 +52,11 @@ const SignupPage = () => {
       }}
     >
       <Container maxWidth="sm">
-        <motion.div
-          variants={fadeIn}
-          initial="hidden"
-          animate="visible"
-        >
-          <Box
-            className="bg-white p-8 rounded-lg shadow-lg"
-            sx={{ border: 1, borderColor: "divider" }}
-          >
-            <motion.div
-              variants={bounce}
-              className="text-center"
-            >
+        <motion.div variants={fadeIn} initial="hidden" animate="visible">
+          <Box className="bg-white p-8 rounded-lg shadow-lg" sx={{ border: 1, borderColor: "divider" }}>
+            <motion.div variants={bounce} className="text-center">
               <LockOutlined className="text-blue-500 text-4xl mb-4" />
-              <Typography
-                variant="h4"
-                className="font-bold mb-2 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent"
-              >
+              <Typography variant="h4" className="font-bold mb-2 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
                 Sign Up
               </Typography>
               <Typography variant="body2" className="text-gray-600">
@@ -76,11 +64,7 @@ const SignupPage = () => {
               </Typography>
             </motion.div>
 
-            <motion.form
-              variants={slideInUp}
-              className="mt-6 space-y-4"
-              onSubmit={handleSubmit(onSubmit)}
-            >
+            <motion.form variants={slideInUp} className="mt-6 space-y-4" onSubmit={handleSubmit(onSubmit)}>
               <FormController
                 control={control}
                 name="fullName"
@@ -116,9 +100,7 @@ const SignupPage = () => {
                 errors={errors}
               />
 
-              <motion.div
-                variants={slideInUp}
-              >
+              <motion.div variants={slideInUp}>
                 <Button
                   fullWidth
                   variant="contained"
@@ -130,10 +112,7 @@ const SignupPage = () => {
               </motion.div>
             </motion.form>
 
-            <motion.div
-              variants={slideInUp}
-              className="mt-6 text-center"
-            >
+            <motion.div variants={slideInUp} className="mt-6 text-center">
               <Typography variant="body2" className="text-gray-600">
                 Already have an account?{" "}
                 <Button onClick={() => route.push('/Auth/login')} className="text-blue-500 hover:underline">
