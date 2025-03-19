@@ -1,0 +1,9 @@
+{
+    "functions": {
+      "src/app/api/auth/[action]/route.js": {
+        "memory": 512,
+        "maxDuration": 15
+      }
+    }
+  }
+  

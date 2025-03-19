@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 
-const mongoUsername = process.env.MONGO_USERNAME || 'akhilsoigama';
-const mongoPassword = process.env.MONGO_PASSWORD || 'akhil123';
-const ConnectionStr = `mongodb+srv://${mongoUsername}:${mongoPassword}@cluster0.3ajd1.mongodb.net/booster?retryWrites=true&w=majority&appName=Cluster0`;
+const MONGO_URI = process.env.MONGODB_URI;
 
 let isConnected = false;
 
@@ -13,9 +11,7 @@ const connectDB = async () => {
   }
 
   try {
-    await mongoose.connect(ConnectionStr, {
-      dbName: 'booster',
-    });
+    await mongoose.connect(MONGO_URI, { dbName: 'booster' });
     isConnected = true;
     console.log('✅ MongoDB connected successfully');
   } catch (error) {
