@@ -11,14 +11,15 @@ import { SelectFieldController } from '../../common/controller/SelectFiled';
 import { TextareaController } from '../../common/controller/Textarea';
 import { SocialMediaFieldController } from '../../common/controller/SocialMedia';
 import dynamic from 'next/dynamic';
-import { useEffect } from 'react';
 import axios from 'axios';
+import { useMemo } from 'react';
 
 const EditProfile = () => {
     const { user } = useUser();
     const baseUrl = process.env.NEXT_PUBLIC_HOST;
 
-    const defaultValues = {
+    // ✅ Memoize defaultValues
+    const defaultValues = useMemo(() => ({
         name: user?.fullName || '',
         email: user?.email || '',
         bio: '',
@@ -30,7 +31,13 @@ const EditProfile = () => {
         youTube: '',
         linkedIn: '',
         github: '',
-    };
+    }), [user]);
+
+    const genderOptions = useMemo(() => [
+        { value: 'male', label: 'Male' },
+        { value: 'female', label: 'Female' },
+        { value: 'other', label: 'Other' },
+    ], []);
 
     const {
         control,
@@ -38,42 +45,12 @@ const EditProfile = () => {
         setValue,
         reset,
         formState: { errors },
-    } = useForm({
-        defaultValues,
-    });
+    } = useForm({ defaultValues });
 
-    // const fetchSavedProfile = async () => {
-    //     try {
-    //         const response = await axios.get(`${baseUrl}/api/get-profile`, {
-    //             params: {
-    //                 userId: user?._id, // Pass userId as a query parameter
-    //             },
-    //         });
-    //         return response.data; // Return the fetched profile data
-    //     } catch (error) {
-    //         console.error('Error fetching profile:', error.response?.data || error.message);
-    //         return null;
-    //     }
-    // };
-
-    // Fetch and set saved profile data when the component mounts
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         const savedProfile = await fetchSavedProfile();
-    //         if (savedProfile && Object.keys(savedProfile).length > 0) {
-    //             reset(savedProfile); // Reset the form with fetched data
-    //         }
-    //     };
-    //     fetchData();
-    // }, [reset, user?._id]); // Add user._id as a dependency
-
-    // Handle form submission
     const onSubmit = async (data) => {
         try {
             const response = await axios.post(`${baseUrl}/api/saved-profile`, data, {
-                params: {
-                    userId: user?._id, // Pass userId as a query parameter
-                },
+                params: { userId: user?._id },
             });
             console.log('Profile saved:', response.data);
         } catch (error) {
@@ -83,37 +60,19 @@ const EditProfile = () => {
 
     return (
         <Container maxWidth="md" className="py-8">
-            <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={cardVariants}
-            >
+            <motion.div initial="hidden" animate="visible" variants={cardVariants}>
                 <Card className="shadow-lg">
-                    <CardHeader
-                        title={
-                            <Typography variant="h4" className="text-center font-bold">
-                                Edit Profile
-                            </Typography>
-                        }
-                    />
+                    <CardHeader title={
+                        <Typography variant="h4" className="text-center font-bold">
+                            Edit Profile
+                        </Typography>
+                    } />
                     <CardContent>
                         <Box component="form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col space-y-6">
                             <AvatarUpload control={control} setValue={setValue} />
 
-                            <TextFieldController
-                                control={control}
-                                name="name"
-                                label="Full Name"
-                                placeholder="Enter your full name"
-                                rules={{ required: 'Full name is required' }}
-                            />
-
-                            <TextFieldController
-                                control={control}
-                                name="email"
-                                label="Email"
-                                placeholder="Enter your email"
-                                type="email"
+                            <TextFieldController control={control} name="name" label="Full Name" placeholder="Enter your full name" rules={{ required: 'Full name is required' }} />
+                            <TextFieldController control={control} name="email" label="Email" placeholder="Enter your email" type="email"
                                 rules={{
                                     required: 'Email is required',
                                     pattern: {
@@ -122,75 +81,21 @@ const EditProfile = () => {
                                     },
                                 }}
                             />
+                            <TextFieldController control={control} errors={errors} name="phone" label="Phone Number" placeholder="Enter your phone number" type="tel" />
+                            <TextFieldController control={control} name="address" label="Address" placeholder="Enter your address" />
+                            <TextFieldController control={control} name="dateOfBirth" label="Date of Birth" placeholder="Enter your date of birth" type="date" />
 
-                            <TextFieldController
-                                control={control}
-                                name="phone"
-                                label="Phone Number"
-                                placeholder="Enter your phone number"
-                                type="tel"
-                            />
+                            <SelectFieldController control={control} name="gender" label="Gender" options={genderOptions} />
 
-                            <TextFieldController
-                                control={control}
-                                name="address"
-                                label="Address"
-                                placeholder="Enter your address"
-                            />
+                            <TextareaController control={control} name="bio" label="Bio" placeholder="Tell us about yourself" />
 
-                            <TextFieldController
-                                control={control}
-                                name="dateOfBirth"
-                                label="Date of Birth"
-                                placeholder="Enter your date of birth"
-                                type="date"
-                            />
-
-                            <SelectFieldController
-                                control={control}
-                                name="gender"
-                                label="Gender"
-                                options={[
-                                    { value: 'male', label: 'Male' },
-                                    { value: 'female', label: 'Female' },
-                                    { value: 'other', label: 'Other' },
-                                ]}
-                            />
-
-                            <TextareaController
-                                control={control}
-                                name="bio"
-                                label="Bio"
-                                placeholder="Tell us about yourself"
-                            />
-
-                            <SocialMediaFieldController
-                                control={control}
-                                name="youTube"
-                                label="YouTube"
-                                placeholder="Enter your YouTube handle"
-                            />
-                            <SocialMediaFieldController
-                                control={control}
-                                name="linkedIn"
-                                label="LinkedIn"
-                                placeholder="Enter your LinkedIn profile URL"
-                            />
-                            <SocialMediaFieldController
-                                control={control}
-                                name="github"
-                                label="GitHub"
-                                placeholder="Enter your GitHub profile URL"
-                            />
+                            <SocialMediaFieldController control={control} name="youTube" label="YouTube" placeholder="Enter your YouTube handle" />
+                            <SocialMediaFieldController control={control} name="linkedIn" label="LinkedIn" placeholder="Enter your LinkedIn profile URL" />
+                            <SocialMediaFieldController control={control} name="github" label="GitHub" placeholder="Enter your GitHub profile URL" />
 
                             <motion.div variants={fieldVariants}>
                                 <Box className="flex justify-end">
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        type="submit"
-                                        className="bg-blue-600 hover:bg-blue-700"
-                                    >
+                                    <Button variant="contained" color="primary" type="submit" className="bg-blue-600 hover:bg-blue-700">
                                         Save Changes
                                     </Button>
                                 </Box>
