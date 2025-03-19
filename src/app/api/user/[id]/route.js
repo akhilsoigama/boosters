@@ -2,9 +2,9 @@ import User from '@/app/model/users';
 import connectDB from '@/app/lib/connection';
 import { NextResponse } from 'next/server';
 
-export async function GET(request, { params }) {
+export async function GET(request, context) {
   await connectDB();
-  const { id } = params;
+  const { id } = await context.params;  
 
   try {
     const user = await User.findById(id).select('-password');
@@ -13,6 +13,7 @@ export async function GET(request, { params }) {
     }
     return NextResponse.json(user, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch user', details: error.message }, { status: 500 });
+    console.error('Error:', error);
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

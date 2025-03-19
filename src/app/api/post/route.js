@@ -2,18 +2,26 @@ import Post from '@/app/model/post/post';
 import connectDB from '@/app/lib/connection';
 import { NextResponse } from 'next/server';
 
-// GET - Get All Posts
-export async function GET() {
+export async function GET(req) {
   await connectDB();
+
   try {
-    const posts = await Post.find();
+    const { searchParams } = new URL(req.url);
+    const limit = parseInt(searchParams.get('limit')) || 10; 
+    const skip = parseInt(searchParams.get('skip')) || 0;   
+
+    const posts = await Post.find()
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 }); 
+
     return NextResponse.json(posts, { status: 200 });
   } catch (error) {
+    console.error("Error fetching posts:", error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }
 
-// POST - Create New Post
 export async function POST(request) {
   await connectDB();
   const { title, content, auther, image, User_id } = await request.json();

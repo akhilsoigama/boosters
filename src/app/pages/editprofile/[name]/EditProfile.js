@@ -82,16 +82,16 @@ const EditProfile = () => {
                                 }}
                             />
                             <TextFieldController control={control} errors={errors} name="phone" label="Phone Number" placeholder="Enter your phone number" type="tel" />
-                            <TextFieldController control={control} name="address" label="Address" placeholder="Enter your address" />
-                            <TextFieldController control={control} name="dateOfBirth" label="Date of Birth" placeholder="Enter your date of birth" type="date" />
+                            <TextFieldController control={control}  errors={errors} name="address" label="Address" placeholder="Enter your address" />
+                            <TextFieldController control={control}  errors={errors} name="dateOfBirth" label="Date of Birth" placeholder="Enter your date of birth" type="date" />
 
-                            <SelectFieldController control={control} name="gender" label="Gender" options={genderOptions} />
+                            <SelectFieldController control={control}  errors={errors} name="gender" label="Gender" options={genderOptions} />
 
-                            <TextareaController control={control} name="bio" label="Bio" placeholder="Tell us about yourself" />
+                            <TextareaController control={control} errors={errors} name="bio" label="Bio" placeholder="Tell us about yourself" />
 
-                            <SocialMediaFieldController control={control} name="youTube" label="YouTube" placeholder="Enter your YouTube handle" />
-                            <SocialMediaFieldController control={control} name="linkedIn" label="LinkedIn" placeholder="Enter your LinkedIn profile URL" />
-                            <SocialMediaFieldController control={control} name="github" label="GitHub" placeholder="Enter your GitHub profile URL" />
+                            <SocialMediaFieldController control={control}  errors={errors} name="youTube" label="YouTube" placeholder="Enter your YouTube handle" />
+                            <SocialMediaFieldController control={control}  errors={errors} name="linkedIn" label="LinkedIn" placeholder="Enter your LinkedIn profile URL" />
+                            <SocialMediaFieldController control={control}  errors={errors} name="github" label="GitHub" placeholder="Enter your GitHub profile URL" />
 
                             <motion.div variants={fieldVariants}>
                                 <Box className="flex justify-end">
