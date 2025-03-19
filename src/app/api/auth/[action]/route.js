@@ -1,4 +1,3 @@
-// src/app/api/auth/[action]/route.js
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie';
@@ -6,37 +5,19 @@ import connectDB from '@/app/lib/connection';
 import User from '@/app/model/users';
 import { NextResponse } from 'next/server';
 
-export async function POST(request, { params }) {
-  const { action } = params;
-  console.log('API Called:', action);
-
-  await connectDB();
-
-  if (action === 'signup') return signup(request);
-  if (action === 'login') return login(request);
-  if (action === 'logout') return logout();
-
-  return NextResponse.json({ message: 'Route not found' }, { status: 404 });
-}
-
-export async function GET(request, { params }) {
-  const { action } = params;
-  if (action === 'check-auth') return checkAuth(request);
-  return NextResponse.json({ message: 'Route not found' }, { status: 404 });
-}
-
+// 🔥 Token generator
 const generateToken = (user) => {
-  if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET is not defined in .env');
-  }
-  return jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign(
+    { id: user._id, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+  );
 };
 
+// 🔥 Signup Logic
 const signup = async (request) => {
   try {
     const { fullName, email, password } = await request.json();
-    console.log('Signup Attempt:', email);
-
     const existingUser = await User.findOne({ email });
     if (existingUser) return NextResponse.json({ message: 'User already exists' }, { status: 400 });
 
@@ -54,14 +35,11 @@ const signup = async (request) => {
   }
 };
 
+// 🔥 Login Logic
 const login = async (request) => {
   try {
     const { email, password } = await request.json();
-    console.log('Login Attempt:', email);
-
     const user = await User.findOne({ email });
-    console.log('User Found:', user?._id || 'No User Found');
-
     if (!user) return NextResponse.json({ message: 'Invalid email or password' }, { status: 400 });
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -77,6 +55,7 @@ const login = async (request) => {
   }
 };
 
+// 🔥 Logout Logic
 const logout = () => {
   const response = NextResponse.json({ message: 'Logged out successfully' });
   response.headers.append('Set-Cookie', cookie.serialize('token', '', {
@@ -87,6 +66,7 @@ const logout = () => {
   return response;
 };
 
+// 🔥 Check Auth Status
 const checkAuth = async (request) => {
   try {
     const cookies = cookie.parse(request.headers.get('cookie') || '');
@@ -101,11 +81,32 @@ const checkAuth = async (request) => {
   }
 };
 
+// 🔥 Cookie Setter
 const setTokenCookie = (response, token) => {
   response.headers.append('Set-Cookie', cookie.serialize('token', token, {
     httpOnly: true,
     path: '/',
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'Lax',
+    maxAge: 7 * 24 * 60 * 60 // 7 days
   }));
 };
+
+// 🔥 POST API Handler
+export async function POST(request, { params }) {
+  await connectDB();
+  const { action } = params;
+
+  if (action === 'signup') return signup(request);
+  if (action === 'login') return login(request);
+  if (action === 'logout') return logout();
+
+  return NextResponse.json({ message: 'Route not found' }, { status: 404 });
+}
+
+// 🔥 GET API Handler
+export async function GET(request, { params }) {
+  const { action } = params;
+  if (action === 'check-auth') return checkAuth(request);
+  return NextResponse.json({ message: 'Route not found' }, { status: 404 });
+}
