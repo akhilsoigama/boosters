@@ -9,7 +9,6 @@ import { use, useMemo } from 'react';
 const Page = ({ params }) => {
   const {id}= use(params)
 
-  // ✅ Optional: Memoize the posts component
   const renderedPosts = useMemo(() => <Posts ids={id} />, [id]);
 
   return (

@@ -8,6 +8,8 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request, { params }) {
   const { action } = params;
+  console.log('API Called:', action);
+
   await connectDB();
 
   if (action === 'signup') return signup(request);
@@ -23,11 +25,18 @@ export async function GET(request, { params }) {
   return NextResponse.json({ message: 'Route not found' }, { status: 404 });
 }
 
-const generateToken = (user) => jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+const generateToken = (user) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not defined in .env');
+  }
+  return jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+};
 
 const signup = async (request) => {
   try {
     const { fullName, email, password } = await request.json();
+    console.log('Signup Attempt:', email);
+
     const existingUser = await User.findOne({ email });
     if (existingUser) return NextResponse.json({ message: 'User already exists' }, { status: 400 });
 
@@ -40,7 +49,7 @@ const signup = async (request) => {
     setTokenCookie(response, token);
     return response;
   } catch (error) {
-    console.error(error);
+    console.error('Signup Error:', error);
     return NextResponse.json({ message: 'Server Error' }, { status: 500 });
   }
 };
@@ -48,7 +57,11 @@ const signup = async (request) => {
 const login = async (request) => {
   try {
     const { email, password } = await request.json();
+    console.log('Login Attempt:', email);
+
     const user = await User.findOne({ email });
+    console.log('User Found:', user?._id || 'No User Found');
+
     if (!user) return NextResponse.json({ message: 'Invalid email or password' }, { status: 400 });
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -59,7 +72,7 @@ const login = async (request) => {
     setTokenCookie(response, token);
     return response;
   } catch (error) {
-    console.error(error);
+    console.error('Login Error:', error);
     return NextResponse.json({ message: 'Server Error' }, { status: 500 });
   }
 };

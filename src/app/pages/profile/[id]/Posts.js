@@ -13,35 +13,39 @@ const Posts = ({ ids }) => {
     const [loading, setLoading] = useState(true);
     const { user } = useUser();
 
-    const fetchPosts = async () => {
+    const fetchPosts = useCallback(async () => {
         try {
-            const response = await axios.get(`/api/post`, {
-                params: {
-                    User_Id: user._id,
-                },
-            });
-            if (response.data?.length > 0) {
-                const postsWithUserData = await Promise.all(
-                    response.data.map(async (post) => {
-                        const userResponse = await axios.get(`/api/user/${post.User_id}`);
-                        return { ...post, userData: userResponse.data };
-                    })
-                );
-                const filteredPosts = postsWithUserData.filter(post => post.User_id === ids);
-                setPosts(filteredPosts);
+          const response = await axios.get(`/api/post`, {
+            params: {
+              User_Id: user._id,
+              limit: 10,    
             }
+          });
+    
+          if (response.data?.length > 0) {
+            const postsWithUserData = await Promise.all(
+              response.data.map(async (post) => {
+                const userResponse = await axios.get(`/api/user/${post.User_id}`);
+                return { ...post, userData: userResponse.data };
+              })
+            );
+            const shuffled = shuffleArray(postsWithUserData);
+            setPosts(shuffled);
+            setVisiblePosts(shuffled.slice(0, loadCount));
+          } else {
+            setHasMore(false);
+          }
         } catch (error) {
-            toast.error('Error fetching posts');
+          toast.error(error?.response?.data?.message || 'Failed to fetch posts');
         } finally {
-            setLoading(false);
+          setLoading(false);
         }
-    };
+      }, [user?._id, shuffleArray]);
 
     useEffect(() => {
         if (user?._id) fetchPosts();
     }, [user, ids]);
 
-    // ✅ Memoize the loading skeletons
     const loadingSkeletons = useMemo(() => (
         [...Array(3)].map((_, i) => (
             <motion.div
@@ -76,7 +80,6 @@ const Posts = ({ ids }) => {
         ))
     ), []);
 
-    // ✅ Memoize the rendered post list
     const renderedPosts = useMemo(() => (
         posts.map((post, i) => (
             <motion.div

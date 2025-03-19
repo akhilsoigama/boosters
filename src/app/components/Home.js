@@ -28,7 +28,12 @@ const HomePage = () => {
 
   const fetchPosts = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/post`, { params: { User_Id: user._id } });
+      const response = await axios.get(`/api/post`, {
+        params: {
+          User_Id: user._id,
+          limit: 10,
+        }
+      });
 
       if (response.data?.length > 0) {
         const postsWithUserData = await Promise.all(
