@@ -57,7 +57,6 @@ export const UserProvider = ({ children }) => {
         }
     };
 
-    // ✅ Memoize context value to avoid unnecessary re-renders
     const contextValue = useMemo(() => ({
         isLoggedIn,
         user,

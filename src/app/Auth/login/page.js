@@ -16,9 +16,7 @@ const LoginForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Memoize redirect URL and base URL
   const redirect = useMemo(() => searchParams.get('redirect') || '/', [searchParams]);
-  const baseUrl = useMemo(() => process.env.NEXT_PUBLIC_API_URL, []);
 
   const [isLoading, setIsLoading] = useState(false);
 
