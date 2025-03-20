@@ -20,7 +20,6 @@ const Posts = ({ ids }) => {
         params: { User_Id: user._id, limit: 20 }
       });
 
-
       if (response.data?.length > 0) {
         setPosts(response.data);
       } else {

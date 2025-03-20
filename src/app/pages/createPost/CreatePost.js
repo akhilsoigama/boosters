@@ -22,11 +22,10 @@ const PostForm = () => {
     resolver: zodResolver(PostSchemas),
   });
 
-  // ✅ Memoize user ID to prevent recalculation on every render
   const userId = useMemo(() => user?._id, [user]);
 
   const onSubmit = async (data) => {
-    const postData = { ...data, User_id: userId };  // Directly create the object
+    const postData = { ...data, User_id: userId }; 
   
     try {
       const response = await axios.post(`/api/post`, postData);
