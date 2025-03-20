@@ -1,7 +1,7 @@
 'use client';
 import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { toast } from 'sonner';
 
@@ -12,30 +12,41 @@ export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const pathname = usePathname();
 
     useEffect(() => {
-        checkLoginStatus();
-    }, []);
+        if (pathname !== '/Auth/login') {
+            checkLoginStatus();
+        } else {
+            setLoading(false); 
+        }
+    }, [pathname]);
 
     const checkLoginStatus = async () => {
+        console.log('🔎 Checking login status...');
         try {
             const response = await axios.get('/api/auth/check-auth', { withCredentials: true });
+            console.log('✅ Check response:', response.data);
             if (response.data.isLoggedIn) {
                 setIsLoggedIn(true);
-                setUser(response.data.user); // 👈 yahan se user data mil raha hona chahiye
+                setUser(response.data.user);
             } else {
-                setIsLoggedIn(false);
-                setUser(null);
-                router.push('/Auth/login');
+                redirectToLogin();
             }
         } catch (error) {
-            console.error('Error checking login:', error);
+            console.error('❌ Error checking login:', error);
             toast.error('Error checking login status');
-            setIsLoggedIn(false);
-            setUser(null);
-            router.push('/Auth/login');
+            redirectToLogin();
         } finally {
             setLoading(false);
+        }
+    };
+
+    const redirectToLogin = () => {
+        setIsLoggedIn(false);
+        setUser(null);
+        if (pathname !== '/Auth/login') {
+            router.push('/Auth/login');
         }
     };
 
@@ -47,7 +58,7 @@ export const UserProvider = ({ children }) => {
             setUser(null);
             router.push('/Auth/login');
         } catch (error) {
-            console.error('Error logging out:', error);
+            console.error('❌ Error logging out:', error);
         }
     };
 
