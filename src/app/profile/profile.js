@@ -2,9 +2,9 @@
 import { Typography, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
-import { useUser } from '../../contaxt/userContaxt';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
+import { useUser } from '../contaxt/userContaxt';
 
 const UserProfile = () => {
     const router = useRouter();

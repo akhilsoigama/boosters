@@ -21,7 +21,7 @@ const BottomNavbar = () => {
     { text: 'Friends', icon: <People />, link: '' },
     { text: 'create post', icon: <AddCircleIcon className='text-3xl' />, link: '/pages/createPost' },
     { text: 'Settings', icon: <Settings />, link: '' },
-    { text: 'Profile', icon: <ProfileLogo user={user} />, link: `/pages/profile/${userId} ` },
+    { text: 'Profile', icon: <ProfileLogo user={user} />, link: `/profile/${userId} ` },
   ];
 
   return (
