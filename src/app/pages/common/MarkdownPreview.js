@@ -1,6 +1,7 @@
 'use client';
 import ReactMarkdown from 'react-markdown';
 import TurndownService from 'turndown';
+import remarkGfm from 'remark-gfm';
 import { useState } from 'react';
 
 const turndownService = new TurndownService();
@@ -14,7 +15,7 @@ const CodeBlock = ({ language, value }) => {
     const copyToClipboard = () => {
         navigator.clipboard.writeText(value).then(() => {
             setIsCopied(true);
-            setTimeout(() => setIsCopied(false), 2000); 
+            setTimeout(() => setIsCopied(false), 2000);
         });
     };
 
@@ -49,6 +50,7 @@ const MarkdownPreview = ({ content }) => {
     return (
         <div className="mt-4 p-4 rounded-lg prose dark:prose-invert">
             <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
                 components={{
                     code({ node, inline, className, children, ...props }) {
                         const match = /language-(\w+)/.exec(className || '');
@@ -63,6 +65,16 @@ const MarkdownPreview = ({ content }) => {
                             </code>
                         );
                     },
+                    a: ({ href, children }) => (
+                        <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline hover:text-blue-800"
+                        >
+                            {children}
+                        </a>
+                    ),
                 }}
             >
                 {markdownContent}
