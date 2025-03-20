@@ -8,12 +8,12 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit')) || 10; 
-    const skip = parseInt(searchParams.get('skip')) || 0;   
-
+    const skip = parseInt(searchParams.get('skip')) || 0; 
+      
     const posts = await Post.find()
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 }); 
+    .populate('User_id', 'fullName email') 
+    .skip(skip)
+    .limit(limit); 
 
     return NextResponse.json(posts, { status: 200 });
   } catch (error) {

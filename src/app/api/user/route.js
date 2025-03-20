@@ -2,7 +2,6 @@ import User from '@/app/model/users';
 import connectDB from '@/app/lib/connection';
 import { NextResponse } from 'next/server';
 
-// GET: Fetch all users (excluding passwords)
 export async function GET() {
   await connectDB();
   try {
