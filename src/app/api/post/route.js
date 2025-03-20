@@ -2,25 +2,33 @@ import Post from '@/app/model/post/post';
 import connectDB from '@/app/lib/connection';
 import { NextResponse } from 'next/server';
 
+
 export async function GET(req) {
   await connectDB();
 
   try {
     const { searchParams } = new URL(req.url);
-    const limit = parseInt(searchParams.get('limit')) || 10; 
-    const skip = parseInt(searchParams.get('skip')) || 0; 
-      
-    const posts = await Post.find()
-    .populate('User_id', 'fullName email') 
-    .skip(skip)
-    .limit(limit); 
+    const limit = parseInt(searchParams.get('limit')) || 10;
+    const skip = parseInt(searchParams.get('skip')) || 0;
+    const User_Id = searchParams.get('User_Id'); 
+
+    let query = {};
+    if (User_Id) {
+      query.User_id = User_Id;
+    }
+
+    const posts = await Post.find(query)
+      .populate('User_id', 'fullName email') 
+      .skip(skip)
+      .limit(limit);
 
     return NextResponse.json(posts, { status: 200 });
   } catch (error) {
-    console.error("Error fetching posts:", error);
+    console.error('Error fetching posts:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }
+
 
 export async function POST(request) {
   await connectDB();
