@@ -26,12 +26,11 @@ const PostForm = () => {
   const userId = useMemo(() => user?._id, [user]);
 
   const onSubmit = async (data) => {
-    // ✅ Memoize the postData object
-    const postData = useMemo(() => ({ ...data, User_id: userId }), [data, userId]);
-
+    const postData = { ...data, User_id: userId };  // Directly create the object
+  
     try {
       const response = await axios.post(`/api/post`, postData);
-
+  
       if (response.data) {
         toast.success(response.data.message);
       } else {

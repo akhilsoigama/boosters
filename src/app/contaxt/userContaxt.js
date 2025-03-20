@@ -15,7 +15,7 @@ export const UserProvider = ({ children }) => {
     const pathname = usePathname();
 
     useEffect(() => {
-        if (pathname !== '/Auth/login') {
+        if (pathname !== '/Auth/signup') {
             checkLoginStatus();
         } else {
             setLoading(false);
