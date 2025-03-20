@@ -29,20 +29,11 @@ const HomePage = () => {
   const fetchPosts = useCallback(async () => {
     try {
       const response = await axios.get(`/api/post`, {
-        params: {
-          User_Id: user._id,
-          limit: 10,
-        }
+        params: { User_Id: user._id, limit: 10 }
       });
 
       if (response.data?.length > 0) {
-        const postsWithUserData = await Promise.all(
-          response.data.map(async (post) => {
-            const userResponse = await axios.get(`/api/user/${post.User_id}`);
-            return { ...post, userData: userResponse.data };
-          })
-        );
-        const shuffled = shuffleArray(postsWithUserData);
+        const shuffled = shuffleArray(response.data);
         setPosts(shuffled);
         setVisiblePosts(shuffled.slice(0, loadCount));
       } else {
@@ -54,6 +45,7 @@ const HomePage = () => {
       setLoading(false);
     }
   }, [user?._id, shuffleArray]);
+
 
   useEffect(() => {
     if (user?._id) fetchPosts();
@@ -101,12 +93,12 @@ const HomePage = () => {
                 <CardHeader
                   avatar={
                     <Avatar className="bg-blue-500 dark:bg-blue-700">
-                      {post.userData?.fullName?.charAt(0).toUpperCase() || 'U'}
+                      {post.User_id?.fullName?.charAt(0).toUpperCase() || 'U'}
                     </Avatar>
                   }
                   action={<IconButton aria-label="settings" className="dark:text-white"><MoreVert /></IconButton>}
-                  title={<span className="dark:text-white">{post.userData?.fullName || 'Unknown User'}</span>}
-                  subheader={<span className="dark:text-gray-400">{post.userData?.email || ''}</span>}
+                  title={<span className="dark:text-white">{post.User_id?.fullName || 'Unknown User'}</span>}
+                  subheader={<span className="dark:text-gray-400">{post.User_id?.email || ''}</span>}
                   className="bg-blue-50 dark:bg-gray-700 italic"
                 />
                 <CardContent className="w-full flex justify-center">

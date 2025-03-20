@@ -6,8 +6,8 @@ const nextConfig = {
 
     return [
       {
-        source: '/pages/api/:path*',
-        destination: 'https://boosters-sooty.vercel.app/pages/api/:path*',
+        source: '/api/:path*',
+        destination: 'https://boosters-sooty.vercel.app/api/:path*',
       },
     ];
 
