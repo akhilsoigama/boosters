@@ -28,9 +28,8 @@ const HomePage = () => {
 
   const fetchPosts = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/post`, {
-        params: { User_Id: user._id, limit: 10 }
-      });
+      const response = await axios.get('/api/post', { params: { limit: 20 } });
+
 
       if (response.data?.length > 0) {
         const shuffled = shuffleArray(response.data);
