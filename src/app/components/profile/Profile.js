@@ -46,7 +46,7 @@ export function DropdownMenuDemo() {
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => route.push(`/pages/profile/${userId}`)}>
+                        <DropdownMenuItem onClick={() => route.push(`/profile/${userId}`)}>
                             Profile
                             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                         </DropdownMenuItem>

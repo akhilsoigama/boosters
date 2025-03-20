@@ -5,9 +5,9 @@ import { Card, CardHeader, Avatar, CardContent, CardActions, IconButton } from '
 import { Favorite, Share, MoreVert } from '@mui/icons-material';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { useUser } from '@/app/contaxt/userContaxt';
-import MarkdownPreview from '../../common/MarkdownPreview';
 import SkeletonLoader from '@/app/components/SkeletonLoader';
+import MarkdownPreview from '@/app/pages/common/MarkdownPreview';
+import { useUser } from '@/app/contaxt/userContaxt';
 
 const Posts = ({ ids }) => {
   const [posts, setPosts] = useState([]);

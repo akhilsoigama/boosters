@@ -23,7 +23,6 @@ export async function GET() {
 
         return NextResponse.json({ isLoggedIn: true, user }, { status: 200 });
     } catch (err) {
-        console.log('Auth check error:', err);
         return NextResponse.json({ isLoggedIn: false }, { status: 500 });
     }
 }

@@ -18,15 +18,13 @@ export const UserProvider = ({ children }) => {
         if (pathname !== '/Auth/login') {
             checkLoginStatus();
         } else {
-            setLoading(false); 
+            setLoading(false);
         }
     }, [pathname]);
 
     const checkLoginStatus = async () => {
-        console.log('🔎 Checking login status...');
         try {
             const response = await axios.get('/api/auth/check-auth', { withCredentials: true });
-            console.log('✅ Check response:', response.data);
             if (response.data.isLoggedIn) {
                 setIsLoggedIn(true);
                 setUser(response.data.user);
@@ -34,7 +32,6 @@ export const UserProvider = ({ children }) => {
                 redirectToLogin();
             }
         } catch (error) {
-            console.error('❌ Error checking login:', error);
             toast.error('Error checking login status');
             redirectToLogin();
         } finally {
@@ -58,7 +55,7 @@ export const UserProvider = ({ children }) => {
             setUser(null);
             router.push('/Auth/login');
         } catch (error) {
-            console.error('❌ Error logging out:', error);
+            toast.error('❌ Error logging out:', error);
         }
     };
 
