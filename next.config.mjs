@@ -2,16 +2,16 @@
 const nextConfig = {
  
 
-  async rewrites() {
+  // async rewrites() {
 
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'https://boosters-sooty.vercel.app/api/:path*',
-      },
-    ];
+  //   return [
+  //     {
+  //       source: '/api/:path*',
+  //       destination: 'https://boosters-sooty.vercel.app/api/:path*',
+  //     },
+  //   ];
 
-  },
+  // },
 };
 
 export default nextConfig;
