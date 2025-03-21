@@ -3,10 +3,8 @@ import { createContext, useContext, useState, useCallback, useRef, useEffect } f
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useUser } from './userContaxt';
-import { io } from 'socket.io-client';
 
 export const PostContext = createContext();
-let socket; // global socket
 
 export const PostProvider = ({ children }) => {
   const [posts, setPosts] = useState([]);
@@ -21,30 +19,7 @@ export const PostProvider = ({ children }) => {
   const observer = useRef();
   const { user } = useUser();
 
-  // ✅ Initialize Socket.io (Replace with your Railway / Vercel Socket URL)
-  useEffect(() => {
-    const socket = io('https://caboose.proxy.rlwy.net:22628', { transports: ['websocket'] });
-
-
-    // Listen for real-time likes
-    socket.on('post-liked', (data) => {
-      setLikesCount((prev) => ({
-        ...prev,
-        [data.postId]: data.likeCount,
-      }));
-    });
-
-    // Listen for real-time comments (optional if you want to show instantly)
-    socket.on('post-commented', (data) => {
-      toast.success(`New comment on post: ${data.postId}`);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
-  // ✅ Fetch Posts
+  // Fetch Posts
   const fetchPosts = useCallback(async () => {
     try {
       const res = await axios.get('/api/post', { params: { limit: 20 } });
@@ -66,7 +41,6 @@ export const PostProvider = ({ children }) => {
     if (user?._id) fetchPosts();
   }, [user, fetchPosts]);
 
-  // ✅ Infinite Scroll Observer
   const lastPostRef = useCallback((node) => {
     if (loading) return;
     if (observer.current) observer.current.disconnect();
@@ -83,25 +57,14 @@ export const PostProvider = ({ children }) => {
     if (currentLength + loadCount >= posts.length) setHasMore(false);
   };
 
-  // ✅ Like Toggle with Socket Emit
   const handleLikeToggle = (postId) => {
-    const updatedLiked = !likedPosts[postId];
-    setLikedPosts((prev) => ({ ...prev, [postId]: updatedLiked }));
-
-    const newLikeCount = updatedLiked
-      ? (likesCount[postId] || 0) + 1
-      : (likesCount[postId] || 1) - 1;
-
+    setLikedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
     setLikesCount((prev) => ({
       ...prev,
-      [postId]: newLikeCount,
+      [postId]: likedPosts[postId] ? prev[postId] - 1 : prev[postId] + 1,
     }));
-
-    // Emit like event to server
-    socket.emit('like-post', { postId, likeCount: newLikeCount });
   };
 
-  // ✅ Comment Modal Controls
   const handleOpenComment = (post) => {
     setSelectedPost(post);
     setOpenCommentModal(true);
@@ -110,13 +73,6 @@ export const PostProvider = ({ children }) => {
   const handleCloseComment = () => {
     setOpenCommentModal(false);
     setSelectedPost(null);
-  };
-
-  // ✅ Comment Submit (Optional Socket emit for real-time)
-  const handleCommentSubmit = (comment) => {
-    socket.emit('comment-post', { postId: selectedPost._id, comment });
-    toast.success('Comment added!');
-    handleCloseComment();
   };
 
   return (
@@ -134,7 +90,6 @@ export const PostProvider = ({ children }) => {
       openCommentModal,
       selectedPost,
       fetchPosts,
-      handleCommentSubmit,
     }}>
       {children}
     </PostContext.Provider>
