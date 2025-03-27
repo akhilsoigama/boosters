@@ -107,7 +107,7 @@ const CommentModal = ({ open, handleClose, selectedPost }) => {
 
   return (
     <Modal open={open} onClose={handleClose}>
-      <Box className="bg-white dark:bg-gray-900 w-[400px] sm:w-[500px] mx-auto mt-32 rounded-xl overflow-hidden flex flex-col max-h-[80vh]">
+      <Box className="bg-white dark:bg-gray-900 w-full sm:w-[500px] mx-auto mt-32 rounded-xl overflow-hidden flex flex-col h-[70vh]">
         <Box className="p-4 border-b border-gray-300 dark:border-gray-700 text-center font-semibold text-lg">
           Comments ({filteredComments.length})
         </Box>
