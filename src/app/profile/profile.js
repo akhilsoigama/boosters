@@ -25,7 +25,7 @@ const UserProfile = () => {
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="w-full rounded-lg p-8 pt-20 flex justify-center"
+            className="w-full rounded-lg p-8 pt-20 dark:bg-gray-900 dark:text-white flex justify-center"
         >
             <div className="space-y-4">
                 <div className='flex justify-center gap-4'>
