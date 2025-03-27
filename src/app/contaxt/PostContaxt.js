@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useCallback, useRef, useEffect } f
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useUser } from './userContaxt';
+import { io } from 'socket.io-client';
 
 export const PostContext = createContext();
 
@@ -18,8 +19,29 @@ export const PostProvider = ({ children }) => {
   const loadCount = 4;
   const observer = useRef();
   const { user } = useUser();
+  const socketRef = useRef();
 
-  // Fetch Posts
+  useEffect(() => {
+    socketRef.current = io(process.env.NEXT_PUBLIC_API, {
+      transports: ['websocket'],
+    });
+
+    socketRef.current.on('post-liked', (data) => {
+      setLikesCount((prev) => ({
+        ...prev,
+        [data.postId]: data.likeCount,
+      }));
+    });
+
+    socketRef.current.on('post-commented', (data) => {
+      toast.success(`New comment on post: ${data.postId}`);
+    });
+
+    return () => {
+      socketRef.current.disconnect();
+    };
+  }, []);
+
   const fetchPosts = useCallback(async () => {
     try {
       const res = await axios.get('/api/post', { params: { limit: 20 } });
@@ -27,7 +49,7 @@ export const PostProvider = ({ children }) => {
         setPosts(res.data);
         setVisiblePosts(res.data.slice(0, loadCount));
         const likes = {};
-        res.data.forEach((post) => likes[post._id] = post.likes || 0);
+        res.data.forEach((post) => (likes[post._id] = post.likes || 0));
         setLikesCount(likes);
       } else setHasMore(false);
     } catch (err) {
@@ -41,14 +63,17 @@ export const PostProvider = ({ children }) => {
     if (user?._id) fetchPosts();
   }, [user, fetchPosts]);
 
-  const lastPostRef = useCallback((node) => {
-    if (loading) return;
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasMore) loadMorePosts();
-    });
-    if (node) observer.current.observe(node);
-  }, [loading, hasMore]);
+  const lastPostRef = useCallback(
+    (node) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) loadMorePosts();
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore]
+  );
 
   const loadMorePosts = () => {
     const currentLength = visiblePosts.length;
@@ -63,6 +88,11 @@ export const PostProvider = ({ children }) => {
       ...prev,
       [postId]: likedPosts[postId] ? prev[postId] - 1 : prev[postId] + 1,
     }));
+
+    socketRef.current.emit('like-post', {
+      postId,
+      likeCount: likesCount[postId] + (likedPosts[postId] ? -1 : 1),
+    });
   };
 
   const handleOpenComment = (post) => {
@@ -76,21 +106,24 @@ export const PostProvider = ({ children }) => {
   };
 
   return (
-    <PostContext.Provider value={{
-      posts,
-      visiblePosts,
-      loading,
-      hasMore,
-      likedPosts,
-      likesCount,
-      lastPostRef,
-      handleLikeToggle,
-      handleOpenComment,
-      handleCloseComment,
-      openCommentModal,
-      selectedPost,
-      fetchPosts,
-    }}>
+    <PostContext.Provider
+      value={{
+        posts,
+        visiblePosts,
+        loading,
+        hasMore,
+        likedPosts,
+        likesCount,
+        lastPostRef,
+        handleLikeToggle,
+        handleOpenComment,
+        handleCloseComment,
+        openCommentModal,
+        selectedPost,
+        fetchPosts,
+        socketRef, 
+      }}
+    >
       {children}
     </PostContext.Provider>
   );
