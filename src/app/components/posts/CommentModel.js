@@ -60,9 +60,10 @@ const CommentModal = ({ open, handleClose, selectedPost }) => {
   };
 
   useEffect(() => {
-    if (!open || !selectedPost?._id || !socketRef.current) return;
+    if (!open || !selectedPost?._id) return;
 
     const socket = socketRef.current;
+    if (!socket) return;
 
     const handleNewComment = (comment) => {
       if (comment.postId === selectedPost._id) {
@@ -91,7 +92,8 @@ const CommentModal = ({ open, handleClose, selectedPost }) => {
       socket.off('post-commented', handleNewComment);
       socket.off('post-liked', handleCommentLiked);
     };
-  }, [open, selectedPost?._id, socketRef]);
+  }, [open, selectedPost?._id]); // socketRef.current ko hata diya yahan se
+
 
   const handleLikeComment = async (commentId) => {
     try {

@@ -4,6 +4,8 @@ import { Toaster } from "sonner";
 import { ThemeProvider } from "./components/Darkmode/ThemeProvider";
 import { UserProvider } from "./contaxt/userContaxt";
 import { PostProvider } from "./contaxt/PostContaxt";
+import SWRProvider from "./SWRConfig";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -74,23 +76,25 @@ export default function RootLayout({ children }) {
         suppressHydrationWarning
       >
 
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 3000,
-            }} />
-          <UserProvider>
-            <PostProvider>
-              {children}
-            </PostProvider>
-          </UserProvider>
-        </ThemeProvider>
+        <SWRProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 3000,
+              }} />
+            <UserProvider>
+              <PostProvider>
+                {children}
+              </PostProvider>
+            </UserProvider>
+          </ThemeProvider>
+        </SWRProvider>
       </body>
     </html>
   );
