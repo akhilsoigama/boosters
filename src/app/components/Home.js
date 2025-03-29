@@ -1,9 +1,9 @@
 'use client';
 import { motion } from 'framer-motion';
 import SkeletonLoader from '../components/SkeletonLoader';
-import PostCard from './posts/PostCard';
 import CommentModal from './posts/CommentModel';
 import { usePost } from '../contaxt/PostContaxt';
+import RandomPostsPage from './RandomePost/RandomePost';
 
 
 const HomePage = () => {
@@ -12,10 +12,6 @@ const HomePage = () => {
     loading,
     hasMore,
     lastPostRef,
-    likedPosts,
-    likesCount,
-    handleLikeToggle,
-    handleOpenComment,
     openCommentModal,
     handleCloseComment,
     selectedPost,
@@ -39,13 +35,7 @@ const HomePage = () => {
             transition={{ duration: 0.6, ease: "easeOut", delay: i * 0.1 }}
             className="w-full"
           >
-            <PostCard
-              post={post}
-              liked={likedPosts[post._id]}
-              likeCount={likesCount[post._id]}
-              onLikeToggle={handleLikeToggle}
-              onCommentOpen={handleOpenComment}
-            />
+           <RandomPostsPage/>
           </motion.div>
         ))}
         {!hasMore && <p className="text-gray-500 dark:text-gray-400 text-center">No more posts to load.</p>}
