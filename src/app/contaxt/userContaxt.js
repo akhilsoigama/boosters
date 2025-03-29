@@ -1,76 +1,45 @@
 'use client';
-import { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+
+import { createContext, useContext, useMemo, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { toast } from 'sonner';
+import { logoutUser, useAuth } from '../hooks/User';
 
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const { user, isLoggedIn, isLoading, authError, mutate } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
 
     useEffect(() => {
-        if (pathname !== '/Auth/signup') {
-            checkLoginStatus();
-        } else {
-            setLoading(false);
+        if (isLoading) return; // Wait until loading finishes
+        if (!isLoggedIn && pathname !== '/Auth/login') {
+            router.replace('/Auth/login'); // Prevent unnecessary history entries
         }
-    }, [pathname]);
-
-    const checkLoginStatus = async () => {
-        try {
-            const response = await axios.get('/api/auth/check-auth', { withCredentials: true });
-            if (response.data.isLoggedIn) {
-                setIsLoggedIn(true);
-                setUser(response.data.user);
-            } else {
-                redirectToLogin();
-            }
-        } catch (error) {
-            toast.error('Error checking login status');
-            redirectToLogin();
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const redirectToLogin = () => {
-        setIsLoggedIn(false);
-        setUser(null);
-        if (pathname !== '/Auth/login') {
-            router.push('/Auth/login');
-        }
-    };
+    }, [isLoading, isLoggedIn, pathname, router]);
 
     const handleLogout = async () => {
         try {
-            await axios.post('/api/auth/logout', {}, { withCredentials: true });
+            await logoutUser();
             Cookies.remove('token');
-            setIsLoggedIn(false);
-            setUser(null);
-            router.push('/Auth/login');
+            await mutate(null, false); // Immediately clear SWR cache without re-fetching
+            router.replace('/Auth/login');
         } catch (error) {
-            toast.error('❌ Error logging out:', error);
+            toast.error(`❌ Error logging out: ${error.message}`);
         }
     };
 
     const contextValue = useMemo(() => ({
-        isLoggedIn,
-        user,
-        loading,
+        user: user || null,
+        isLoggedIn: isLoggedIn || false,
+        isLoading,
+        authError,
         handleLogout,
-    }), [isLoggedIn, user, loading]);
+    }), [user, isLoggedIn, isLoading, authError]);
 
-    return (
-        <UserContext.Provider value={contextValue}>
-            {children}
-        </UserContext.Provider>
-    );
+    return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
 };
 
 export const useUser = () => useContext(UserContext);
