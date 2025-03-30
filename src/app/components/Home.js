@@ -1,7 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
 import SkeletonLoader from '../components/SkeletonLoader';
-import CommentModal from './posts/CommentModel';
 import { usePost } from '../contaxt/PostContaxt';
 import RandomPostsPage from './RandomePost/RandomePost';
 
@@ -12,9 +11,7 @@ const HomePage = () => {
     loading,
     hasMore,
     lastPostRef,
-    openCommentModal,
-    handleCloseComment,
-    selectedPost,
+ 
   } = usePost();
 
   if (loading) return (
@@ -24,7 +21,7 @@ const HomePage = () => {
   );
 
   return (
-    <div className="min-h-screen p-6 pt-20 w-full flex justify-center bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen p-2 md:p-6 pt-20 w-full flex justify-center bg-gradient-to-b dark:from-gray-950 dark:to-gray-950">
       <div className="space-y-6 max-w-md lg:max-w-2xl grid grid-cols-1 place-items-center">
         {visiblePosts.map((post, i) => (
           <motion.div
@@ -40,13 +37,7 @@ const HomePage = () => {
         ))}
         {!hasMore && <p className="text-gray-500 dark:text-gray-400 text-center">No more posts to load.</p>}
       </div>
-
-      <CommentModal
-        open={openCommentModal}
-        handleClose={handleCloseComment}
-        selectedPost={selectedPost}
-        comments={selectedPost?.comments || []}
-      />
+   
     </div>
   );
 };

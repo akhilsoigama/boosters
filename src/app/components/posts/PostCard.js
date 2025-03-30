@@ -1,53 +1,159 @@
-'use client';
-import { Card, CardHeader, Avatar, CardContent, CardActions, IconButton } from '@mui/material';
-import { Favorite, Share, MoreVert, Comment as CommentIcon } from '@mui/icons-material';
-import { usePost } from '@/app/contaxt/PostContaxt';
-import MarkdownPreview from '@/app/pages/common/MarkdownPreview';
+"use client";
+import { Card, CardHeader, Avatar, CardContent, CardActions, IconButton } from "@mui/material";
+import { Favorite, Share, Comment as CommentIcon, MoreVert } from "@mui/icons-material";
+import { useMemo, useState } from "react";
+import { usePost } from "@/app/contaxt/PostContaxt";
+import MarkdownPreview from "@/app/pages/common/MarkdownPreview";
+import CommentModal from "./CommentModel";
+import { usePathname } from "next/navigation";
+import { useUser } from "@/app/contaxt/userContaxt";
 
-
-const PostCard = ({ post, liked, likeCount }) => {
-  const { handleLikeToggle, handleOpenComment } = usePost();
+const PostCard = ({ post, liked, likeCount, commentCount }) => {
+  const { handleLikeToggle } = usePost();
+  const [openModal, setOpenModal] = useState(false);
+  const pathname = usePathname();
+  const { user } = useUser();
+  const userId = useMemo(() => {
+    return user ? user._id : "";
+  }, [user]);
+  const isSpecificRoute = pathname === `/profile/${userId}`;
 
   return (
-    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 dark:bg-gray-800 dark:text-white">
-      <CardHeader
-        avatar={
-          <Avatar className="bg-blue-500 dark:bg-blue-700">
-            {post.User_id?.fullName?.charAt(0).toUpperCase() || 'U'}
-          </Avatar>
-        }
-        action={<IconButton className="dark:text-white"><MoreVert /></IconButton>}
-        title={<span className="dark:text-white">{post.User_id?.fullName || 'Unknown User'}</span>}
-        subheader={<span className="dark:text-gray-400">{post.User_id?.email || ''}</span>}
-        className="bg-blue-50 dark:bg-gray-700 italic"
-      />
-
-      <CardContent className="w-full flex justify-center">
-        <img
-          src={post.image || '/path/to/fallback/image.jpg'}
-          alt={post.title || 'Post image'}
-          className="w-xl h-auto rounded-md"
-          onError={(e) => { e.target.src = '/path/to/fallback/image.jpg'; }}
+    <>
+      <Card
+        className="
+          shadow-xl 
+          bg-gradient-to-br from-white via-blue-50 to-indigo-100 
+          dark:from-gray-900 dark:via-indigo-950 dark:to-gray-800 
+          rounded-2xl 
+          overflow-hidden 
+          border border-gray-200 dark:border-indigo-900 
+          transition-shadow duration-100
+        "
+      >
+        <CardHeader
+          avatar={
+            <Avatar
+              className="
+                bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 
+                dark:from-indigo-600 dark:via-purple-600 dark:to-pink-600 
+                shadow-lg ring-2 ring-offset-2 ring-indigo-300 dark:ring-indigo-700
+              "
+            >
+              {post.User_id?.fullName?.charAt(0).toUpperCase() || "U"}
+            </Avatar>
+          }
+          title={
+            <span className="font-semibold text-gray-900 dark:text-indigo-100 tracking-tight">
+              {post.User_id?.fullName || "Unknown User"}
+            </span>
+          }
+          subheader={
+            <span className="text-sm text-gray-600 dark:text-indigo-300">
+              {post.User_id?.email || ""}
+            </span>
+          }
+          className="
+            bg-gradient-to-r from-gray-100 to-blue-50 
+            dark:from-gray-800 dark:via-indigo-900 dark:to-gray-900 
+            px-4 py-2 
+            border-b border-gray-200 dark:border-indigo-800
+          "
+          action={
+            isSpecificRoute && (
+              <IconButton
+                className="
+                  text-gray-700 dark:text-indigo-200 
+                  hover:bg-gray-200 dark:hover:bg-indigo-800 
+                  p-2 rounded-full 
+                  shadow-md
+                "
+              >
+                <MoreVert />
+              </IconButton>
+            )
+          }
         />
-      </CardContent>
 
-      <CardContent className="h-60 overflow-auto scrollbar-hide w-full">
-        <MarkdownPreview content={post.content} />
-      </CardContent>
+        {post.image && (
+          <div className="w-full max-h-[350px] overflow-hidden flex justify-center items-center ">
+            <img
+              src={post.image}
+              alt={post.title || "Post image"}
+              className="w-full object-cover transition-transform duration-300 hover:scale-105  shadow-md"
+              onError={(e) => (e.target.src = "/path/to/fallback/image.jpg")}
+            />
+          </div>
+        )}
 
-      <CardActions className="bg-gray-100 dark:bg-gray-700">
-        <IconButton onClick={() => handleLikeToggle(post._id)}>
-          <Favorite className={`text-red-500 dark:text-red-400 ${liked ? 'fill-current' : ''}`} />
-          <span className="ml-1">{likeCount}</span>
-        </IconButton>
+        <CardContent
+          className="
+            px-4 py-3 h-60 overflow-auto scrollbar-hide 
+            text-gray-800 dark:text-indigo-200 
+            bg-gradient-to-b from-transparent to-gray-50/10 
+            dark:from-slate-900 dark:to-indigo-950
+          "
+        >
+          <MarkdownPreview content={post.content} />
+        </CardContent>
 
-        <IconButton onClick={() => handleOpenComment(post)}>
-          <CommentIcon className="text-green-500 dark:text-green-400" />
-        </IconButton>
+        <CardActions
+          className="
+            bg-gradient-to-r from-gray-100 to-blue-50 
+            dark:from-gray-900 dark:via-indigo-900 dark:to-gray-800 
+            flex justify-between 
+            px-4 py-2 
+            border-t border-gray-200 dark:border-indigo-800
+          "
+        >
+          <div className="flex items-center gap-3">
+            <IconButton
+              onClick={() => handleLikeToggle(post._id)}
+              className="
+                text-red-500 dark:text-red-400 
+                hover:bg-red-100 dark:hover:bg-red-900/50 
+                rounded-full p-2
+              "
+            >
+              <Favorite className={liked ? "fill-current" : ""} />
+            </IconButton>
+            <span className="text-sm font-medium text-gray-700 dark:text-indigo-300">
+              {likeCount}
+            </span>
 
-        <IconButton><Share className="text-blue-500 dark:text-blue-400" /></IconButton>
-      </CardActions>
-    </Card>
+            <IconButton
+              onClick={() => setOpenModal(true)}
+              className="
+                text-green-500 dark:text-green-400 
+                hover:bg-green-100 dark:hover:bg-green-900/50 
+                rounded-full p-2
+              "
+            >
+              <CommentIcon />
+            </IconButton>
+            <span className="text-sm font-medium text-gray-700 dark:text-indigo-300">
+              {commentCount}
+            </span>
+          </div>
+
+          <IconButton
+            className="
+              text-blue-500 dark:text-blue-400 
+              hover:bg-blue-100 dark:hover:bg-blue-900/50 
+              rounded-full p-2
+            "
+          >
+            <Share />
+          </IconButton>
+        </CardActions>
+      </Card>
+
+      <CommentModal
+        open={openModal}
+        handleClose={() => setOpenModal(false)}
+        selectedPost={post}
+      />
+    </>
   );
 };
 

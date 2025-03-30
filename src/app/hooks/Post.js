@@ -3,7 +3,6 @@ import axios from "axios";
 import useSWR from "swr";
 import { useMemo, useCallback } from "react";
 
-// ✅ Correct fetcher function (Now accepts URL)
 const fetcher = async (url) => {
   try {
     const { data } = await axios.get(url, { params: { limit: 20 } });
@@ -14,12 +13,10 @@ const fetcher = async (url) => {
   }
 };
 
-// ✅ Shuffle function
 const shuffleArray = (array) => {
   return array.sort(() => Math.random() - 0.5);
 };
 
-// ✅ Custom SWR hook
 export function usePosts() {
   const { data, error, isValidating, mutate } = useSWR("/api/post", fetcher, {
     revalidateIfStale: false,

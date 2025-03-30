@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { CircularProgress, Box } from '@mui/material';
 import PostCard from '../posts/PostCard';
 import { useRandomPosts } from '@/app/hooks/RandomPost';
+import SkeletonLoader from '../SkeletonLoader';
 
 const RandomPostsPage = () => {
   const { posts, isLoading, likedPosts, likesCount, toggleLike } = useRandomPosts();
@@ -33,13 +34,6 @@ const RandomPostsPage = () => {
     observerRef.current.observe(node);
   }, [isLoading, posts, visiblePosts]);
 
-  if (isLoading && visiblePosts.length === 0) {
-    return (
-      <Box className="flex justify-center items-center h-screen">
-        <CircularProgress />
-      </Box>
-    );
-  }
   const uniquePosts = useMemo(() => {
     const postMap = new Map();
     posts.forEach((post) => postMap.set(post._id, post)); 
@@ -66,7 +60,7 @@ const RandomPostsPage = () => {
 
       {isLoading && uniquePosts.length > 0 && (
         <Box className="flex justify-center mt-8">
-          <CircularProgress />
+        <SkeletonLoader/>
         </Box>
       )}
     </div>
