@@ -3,13 +3,12 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { toast } from 'sonner';
-import { useUser } from './userContaxt';
 import { usePosts } from '../hooks/Post';
 
 const PostContext = createContext();
 
 export const PostProvider = ({ children }) => {
-    const { posts, isLoading, postsError, mutate } = usePosts();
+    const { posts, isLoading, mutate } = usePosts();
     const [visiblePosts, setVisiblePosts] = useState([]);
     const [hasMore, setHasMore] = useState(true);
     const [likedPosts, setLikedPosts] = useState({});
@@ -18,14 +17,14 @@ export const PostProvider = ({ children }) => {
     const [selectedPost, setSelectedPost] = useState(null);
     const loadCount = 4;
     const observer = useRef();
-    const { user } = useUser();
     const socketRef = useRef();
 
     useEffect(() => {
         if (posts.length > 0) {
-            setVisiblePosts(posts.slice(0, loadCount));
+            const uniquePosts = Array.from(new Map(posts.map(post => [post._id, post])).values());
+            setVisiblePosts(uniquePosts.slice(0, loadCount));
             const likes = {};
-            posts.forEach((post) => (likes[post._id] = post.likes || 0));
+            uniquePosts.forEach((post) => (likes[post._id] = post.likes || 0));
             setLikesCount(likes);
         }
     }, [posts]);
@@ -74,9 +73,12 @@ export const PostProvider = ({ children }) => {
     const loadMorePosts = () => {
         const currentLength = visiblePosts.length;
         const nextPosts = posts.slice(currentLength, currentLength + loadCount);
-        setVisiblePosts((prev) => [...prev, ...nextPosts]);
-        if (currentLength + loadCount >= posts.length) setHasMore(false);
+        const updatedPosts = [...visiblePosts, ...nextPosts];
+        const uniquePosts = Array.from(new Map(updatedPosts.map(post => [post._id, post])).values());
+        setVisiblePosts(uniquePosts);
+        if (uniquePosts.length >= posts.length) setHasMore(false);
     };
+    
 
     const handleLikeToggle = (postId) => {
         setLikedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));

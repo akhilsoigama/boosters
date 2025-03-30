@@ -1,18 +1,19 @@
 'use client';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardHeader, Avatar, CardContent, CardActions, IconButton } from '@mui/material';
-import { Favorite, Share, MoreVert } from '@mui/icons-material';
 import axios from 'axios';
 import { toast } from 'sonner';
 import SkeletonLoader from '@/app/components/SkeletonLoader';
-import MarkdownPreview from '@/app/pages/common/MarkdownPreview';
 import { useUser } from '@/app/contaxt/userContaxt';
+import PostCard from '@/app/components/posts/PostCard';
+import CommentModal from '@/app/components/posts/CommentModel';
 
 const Posts = ({ ids }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useUser();
+  
+  const [openCommentPost, setOpenCommentPost] = useState(null);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -36,6 +37,14 @@ const Posts = ({ ids }) => {
     if (user?._id) fetchPosts();
   }, [user, ids]);
 
+  const handleOpenComment = (post) => {
+    setOpenCommentPost(post);
+  };
+
+  const handleCloseComment = () => {
+    setOpenCommentPost(null);
+  };
+
   const renderedPosts = useMemo(() => (
     posts.map((post, i) => (
       <motion.div
@@ -45,48 +54,20 @@ const Posts = ({ ids }) => {
         transition={{ duration: 0.5, delay: i * 0.1 }}
         className="w-full"
       >
-        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 dark:bg-gray-800 dark:text-white">
-          <CardHeader
-            avatar={
-              <Avatar className="bg-blue-500 dark:bg-blue-700">
-                {post.User_id?.fullName?.charAt(0).toUpperCase() || 'U'}
-              </Avatar>
-            }
-            action={<IconButton aria-label="settings" className="dark:text-white"><MoreVert /></IconButton>}
-            title={<span className="dark:text-white">{post.User_id?.fullName || 'Unknown User'}</span>}
-            subheader={<span className="dark:text-gray-400">{post.User_id?.email || ''}</span>}
-            className="bg-blue-50 dark:bg-gray-700 italic"
-          />
-          <CardContent className="w-full flex justify-center">
-            <img
-              src={post.image || '/fallback.jpg'}
-              alt={post.title || 'Post image'}
-              className="w-xl h-auto rounded-md"
-              onError={(e) => { e.target.src = '/fallback.jpg'; }}
-            />
-          </CardContent>
-          <CardContent className="h-60 overflow-scroll scrollbar-hide w-full">
-            <MarkdownPreview content={post.content} />
-          </CardContent>
-          <CardActions disableSpacing className="bg-gray-100 dark:bg-gray-700">
-            <IconButton aria-label="add to favorites">
-              <Favorite className="text-red-500 dark:text-red-400" />
-            </IconButton>
-            <IconButton aria-label="share">
-              <Share className="text-blue-500 dark:text-blue-400" />
-            </IconButton>
-          </CardActions>
-        </Card>
+        <PostCard
+          post={post}
+          handleOpenComment={handleOpenComment}
+        />
       </motion.div>
     ))
   ), [posts]);
 
   return (
-    <div className="min-h-screen p-6 pt-20 w-full flex justify-center bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen p-4 pt-20 w-full flex justify-center bg-gradient-to-b dark:from-gray-950 dark:to-gray-950">
       {loading ? (
         <SkeletonLoader />
       ) : (
-        <div className="space-y-6 max-w-md lg:max-w-2xl grid gap-3 mb-10 place-items-center">
+        <div className="space-y-6  max-w-md lg:max-w-2xl grid gap-6 mb-10">
           {renderedPosts}
         </div>
       )}

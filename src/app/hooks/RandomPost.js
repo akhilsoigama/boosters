@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 const fetcher = async (url) => {
   try {
     const res = await axios.get(url, { params: { limit: 20 } });
-    console.log("SWR Fetched Data:", res.data); // ✅ Debugging API Response
     return res.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to fetch posts');
