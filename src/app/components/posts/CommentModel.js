@@ -92,7 +92,7 @@ const CommentModal = ({ open, handleClose, selectedPost }) => {
       socket.off('post-commented', handleNewComment);
       socket.off('post-liked', handleCommentLiked);
     };
-  }, [open, selectedPost?._id]); // socketRef.current ko hata diya yahan se
+  }, [open, selectedPost?._id]); 
 
 
   const handleLikeComment = async (commentId) => {
@@ -114,7 +114,7 @@ const CommentModal = ({ open, handleClose, selectedPost }) => {
           Comments ({filteredComments.length})
         </Box>
 
-        <Box className="flex-1 overflow-y-auto p-4 space-y-4">
+        <Box className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-4">
           {isLoading ? (
             <Typography className="text-gray-500 dark:text-gray-400 text-center py-4">
               Loading comments...
@@ -132,7 +132,7 @@ const CommentModal = ({ open, handleClose, selectedPost }) => {
                   <Typography variant="body2" className="text-gray-600 dark:text-gray-300">
                     {comment.text || comment.comment}
                   </Typography>
-                  <Box className="flex items-center mt-1 space-x-4">
+                  <Box className="flex items-center  mt-1 space-x-4">
                     <Typography variant="caption" className="text-gray-500">
                       {new Date(comment.createdAt).toLocaleString()}
                     </Typography>
