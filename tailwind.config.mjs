@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-const { heroui } = require("@heroui/theme");
+// const { heroui } = require("@heroui/theme");
 
 export default {
 	darkMode: ["class"],
@@ -7,7 +7,7 @@ export default {
 		"./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
 		"./src/components/**/*.{js,ts,jsx,tsx,mdx}",
 		"./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-		"./node_modules/@heroui/theme/dist/components/(image|avatar|card|ripple).js",
+		// "./node_modules/@heroui/theme/dist/components/(image|avatar|card|ripple).js",
 
 	],
 	theme: {
@@ -75,7 +75,7 @@ export default {
 				},
 			});
 		},
-		heroui()
+		// heroui()
 	],
 	
 };
