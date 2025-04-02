@@ -56,3 +56,59 @@ const TiptapEditor = ({ onChange, value}) => {
 
 
 export default TiptapEditor;
+
+
+// 'use client';
+// import { useEditor, EditorContent } from '@tiptap/react';
+// import StarterKit from '@tiptap/starter-kit';
+// import Color from '@tiptap/extension-color';
+// import TextStyle from '@tiptap/extension-text-style';
+// import { useEffect, useState } from 'react';
+// import { MenuBar } from './Menubar';
+
+// const TiptapEditor = ({ onChange, value }) => {
+//   const [mounted, setMounted] = useState(false);
+//   const editor = useEditor({
+//     extensions: [
+//       StarterKit.configure({
+//         listItem: {
+//           HTMLAttributes: {
+//             class: 'list-item',
+//           },
+//         },
+//       }),
+//       Color,
+//       TextStyle,
+//     ],
+//     content: value,
+//     onUpdate: ({ editor }) => {
+//       const html = editor.getHTML();
+//       onChange(html);
+//     },
+//   });
+
+//   useEffect(() => {
+//     setMounted(true);
+//     return () => setMounted(false);
+//   }, []);
+
+//   useEffect(() => {
+//     if (editor && mounted && value !== editor.getHTML()) {
+//       editor.commands.setContent(value || '');
+//     }
+//   }, [value, editor, mounted]);
+
+//   if (!mounted) return null;
+
+//   return (
+//     <div className="w-full">
+//       Content
+//       {editor && <MenuBar editor={editor} />}
+//       <EditorContent editor={editor} />
+//     </div>
+//   );
+// };
+
+// export default TiptapEditor;
+
+

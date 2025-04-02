@@ -7,16 +7,39 @@ import MarkdownPreview from "@/app/pages/common/MarkdownPreview";
 import CommentModal from "./CommentModel";
 import { usePathname } from "next/navigation";
 import { useUser } from "@/app/contaxt/userContaxt";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
+import axios from "axios";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const PostCard = ({ post, liked, likeCount, commentCount }) => {
   const { handleLikeToggle } = usePost();
   const [openModal, setOpenModal] = useState(false);
   const pathname = usePathname();
   const { user } = useUser();
+  const router = useRouter()
   const userId = useMemo(() => {
     return user ? user._id : "";
   }, [user]);
   const isSpecificRoute = pathname === `/profile/${userId}`;
+
+  const handleDelete = async (postId) => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+  
+    try {
+      const res = await axios.delete(`/api/post/${postId}`);
+  
+      if (res.status === 200) {
+        toast.success("Post deleted successfully");
+        window.location.reload();
+      } else {
+        toast.error("Failed to delete post");
+      }
+    } catch (error) {
+      toast.error("Error deleting post");
+    }
+  };
+
 
   return (
     <>
@@ -61,16 +84,18 @@ const PostCard = ({ post, liked, likeCount, commentCount }) => {
           "
           action={
             isSpecificRoute && (
-              <IconButton
-                className="
-                  text-gray-700 dark:text-indigo-200 
-                  hover:bg-gray-200 dark:hover:bg-indigo-800 
-                  p-2 rounded-full 
-                  shadow-md
-                "
-              >
-                <MoreVert />
-              </IconButton>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <IconButton className="text-gray-700 dark:text-indigo-200 hover:bg-gray-200 dark:hover:bg-indigo-800 p-2 h-[40px] w-[40px] rounded-full shadow-md">
+                    <MoreVert />
+                  </IconButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => router.push(`/pages/createPost?postId=${post._id}`)}>Edit</DropdownMenuItem>
+                  <DropdownMenuItem  onClick={() => router.push(`/pages/${post._id}`)}>View</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleDelete(post._id)}>Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )
           }
         />

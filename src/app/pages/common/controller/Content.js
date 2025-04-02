@@ -11,7 +11,7 @@ const ContentField = ({ control, errors }) => {
       <Controller
         name="content"
         control={control}
-        defaultValue=""
+        // defaultValue=""
         rules={{ required: 'Content is required' }}
         render={({ field }) => (
           <Box>
