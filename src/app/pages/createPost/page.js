@@ -11,7 +11,10 @@ const Page = () => {
     <div className='relative w-full h-screen'>
       <div className='w-full flex'>
         {/* <Sidebar /> */}
+        <Suspense fallback={<div>Loading...</div>}>
+            {/* <CreatePostComponent /> */}
         {createPostMemo}
+        </Suspense>
       </div>
       <BottomNavbar />
     </div>
