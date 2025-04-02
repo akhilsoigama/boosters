@@ -9,13 +9,11 @@ export const AvatarUpload = ({ control, setValue }) => {
     const handleImageUpload = (e) => {
         const file = e.target.files?.[0];
         if (file) {
-            // Validate file type
             if (!file.type.startsWith("image/")) {
                 alert("Please select a valid image file!");
                 return;
             }
 
-            // Validate file size (Optional: Example 2MB limit)
             if (file.size > 2 * 1024 * 1024) {
                 alert("File size should be less than 2MB!");
                 return;

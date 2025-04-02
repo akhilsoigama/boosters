@@ -27,8 +27,8 @@ export function useProfiles(userId) {
     };
     const updateProfile = async (updatedData) => {
         try {
-            const response = await axios.patch(`/api/profile/${updatedData.name}`, updatedData);
-            mutate(`/api/profile/${updatedData.name}`, response.data.updatedProfile, false);
+            const response = await axios.patch(`/api/profile`, updatedData);
+            mutate(`/api/profile`, response.data.updatedProfile, false);
             toast.success("Profile updated successfully!");
             return response.data;
         } catch (err) {
