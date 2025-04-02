@@ -1,10 +1,9 @@
-'use'
-import { Typography } from '@mui/material'
-import React from 'react'
-import { Controller } from 'react-hook-form'
-import ImageDropZone from '../DropZone'
+import { Typography } from '@mui/material';
+import React from 'react';
+import { Controller } from 'react-hook-form';
+import ImageDropZone from '../DropZone';
 
-const DropzoneField = ({ control, errors }) => {
+const DropzoneField = ({ control, errors, value }) => {
     return (
         <div className="mb-6">
             <Typography variant="body1" className="mb-2 font-medium">
@@ -13,13 +12,10 @@ const DropzoneField = ({ control, errors }) => {
             <Controller
                 name="image"
                 control={control}
-                defaultValue=""
+                defaultValue={value}  
                 rules={{ required: 'Image is required' }}
                 render={({ field }) => (
-                    <ImageDropZone
-                        value={field.value}
-                        onChange={(value) => field.onChange(value)}
-                    />
+                    <ImageDropZone value={field.value} onChange={field.onChange} />
                 )}
             />
             {errors.image && (
@@ -28,7 +24,7 @@ const DropzoneField = ({ control, errors }) => {
                 </p>
             )}
         </div>
-    )
-}
+    );
+};
 
-export default DropzoneField
+export default DropzoneField;
