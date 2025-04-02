@@ -1,5 +1,5 @@
 'use client';
-import React, { useMemo } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import CreatePost from './CreatePost';
 import Sidebar from '@/app/components/Sidebar';
 import BottomNavbar from '@/app/components/BottomNavbar';
