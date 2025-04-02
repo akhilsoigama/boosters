@@ -6,14 +6,12 @@ import { toast } from 'sonner';
 import SkeletonLoader from '@/app/components/SkeletonLoader';
 import { useUser } from '@/app/contaxt/userContaxt';
 import PostCard from '@/app/components/posts/PostCard';
-import CommentModal from '@/app/components/posts/CommentModel';
 
 const Posts = ({ ids }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useUser();
   
-  const [openCommentPost, setOpenCommentPost] = useState(null);
 
   const fetchPosts = useCallback(async () => {
     try {

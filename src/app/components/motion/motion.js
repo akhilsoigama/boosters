@@ -17,7 +17,13 @@ export const bounce = {
   tap: { y: 0, scale: 0.9 },
 };
 
-
+export const HoverScale = ({ children, scale = 1.1, tapScale = 0.9 }) => {
+  return (
+      <motion.div whileHover={{ scale }} whileTap={{ scale: tapScale }}>
+          {children}
+      </motion.div>
+  );
+};
 export const sidebarVariants = {
   open: { width: 220 },
   closed: { width: 72 },

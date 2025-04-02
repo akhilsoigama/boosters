@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { CircularProgress, Box } from '@mui/material';
+import { Box } from '@mui/material';
 import PostCard from '../posts/PostCard';
 import { useRandomPosts } from '@/app/hooks/RandomPost';
 import SkeletonLoader from '../SkeletonLoader';
