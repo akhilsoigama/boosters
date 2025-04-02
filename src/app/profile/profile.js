@@ -14,28 +14,23 @@ const UserProfile = () => {
     const router = useRouter();
     const { user } = useUser();
     const { profiles, isLoading } = useProfiles(user?._id);
-
     const profile = useMemo(() => {
-        if (profiles?.length > 0) {
-            return {
-                fullName: profiles[0]?.name || user?.fullName || "User",
-                bio: profiles[0]?.bio || user?.bio || "Tell people about yourself",
-                avatar: profiles[0]?.profilePicture || user?.avatar || "",
-                followers: profiles[0]?.followers || user?.followers || "0",
-                following: profiles[0]?.following || user?.following || "0",
-                posts: profiles[0]?.posts || user?.posts || "0",
-            };
-        }
-        return {
-            fullName: user?.fullName || "User",
-            bio: user?.bio || "Tell people about yourself",
-            avatar: user?.avatar || "",
-            followers: user?.followers || "0",
-            following: user?.following || "0",
-            posts: user?.posts || "0",
-        };
+        if (!user?._id || !profiles) return null;
+    
+        const userProfile = profiles.find(p => String(p.User_id._id) === String(user._id));
+    
+        return userProfile
+            ? {
+                fullName: userProfile.name || user?.fullName || "User",
+                bio: userProfile.bio || user?.bio || "Tell people about yourself",
+                avatar: userProfile.profilePicture || user?.avatar || "",
+                followers: userProfile.followers || user?.followers || "0",
+                following: userProfile.following || user?.following || "0",
+                posts: userProfile.posts || user?.posts || "0",
+            }
+            : null;
     }, [profiles, user]);
-
+    
     const firstLetter = useMemo(() => profile?.fullName?.charAt(0).toUpperCase() || 'U', [profile?.fullName]);
 
     const userStats = useMemo(() => (
@@ -84,7 +79,7 @@ const UserProfile = () => {
                                         size="small"
                                         startIcon={<Edit />}
                                         className="hidden sm:flex border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-gray-800 dark:border-blue-400 dark:text-blue-400"
-                                        onClick={() => router.push(`/pages/editprofile/${profile?.fullName || ''}`)}
+                                        onClick={() => router.push(`/pages/editprofile/${user?.fullName || ''}`)}
                                     >
                                         Edit Profile
                                     </Button>
@@ -137,7 +132,7 @@ const UserProfile = () => {
                                     size="small"
                                     startIcon={<Edit />}
                                     className="border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-gray-800 dark:border-blue-400 dark:text-blue-400"
-                                    onClick={() => router.push(`/pages/editprofile/${profile?.fullName || ''}`)}
+                                    onClick={() => router.push(`/pages/editprofile/${user?.fullName || ''}`)}
                                 >
                                     Edit Profile
                                 </Button>
