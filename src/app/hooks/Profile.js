@@ -36,9 +36,6 @@ export function useProfiles(userId) {
             throw err;
         }
     };
-    
-    
-    
     return {
         profiles: data ?? [],
         isLoading,

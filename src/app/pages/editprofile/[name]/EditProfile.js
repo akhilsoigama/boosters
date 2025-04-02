@@ -22,14 +22,15 @@ import { useRouter } from 'next/navigation';
 const EditProfile = () => {
     const router = useRouter();
     const { user } = useUser();
-    const { profiles, createProfile, updateProfile, isLoading } = useProfiles(user?._id);
-    const existingProfile = profiles?.[0] || {};
-
+    const { profiles, createProfile, updateProfile, isLoading } = useProfiles();
+    const existingProfile = useMemo(() => 
+        profiles?.find(p => String(p.User_id._id) === String(user?._id)) || '', 
+    [profiles, user]);
     const defaultValues = useMemo(() => ({
         name: existingProfile?.name || user?.fullName || '',
         bio: existingProfile?.bio || '',
         profilePicture: existingProfile?.profilePicture || '',
-        phoneNo: existingProfile?.phoneNo || '', 
+        phoneNo: existingProfile?.phoneNo || '',
         address: existingProfile?.address || '',
         dob: existingProfile?.dob ? new Date(existingProfile.dob).toISOString().split("T")[0] : '',
         gender: existingProfile?.gender || '',
@@ -58,32 +59,34 @@ const EditProfile = () => {
     }, [existingProfile, setValue]);
 
     const onSubmit = async (data) => {
+        if (!user?._id) {
+            toast.error("User ID is required!");
+            return;
+        }
+    
+        const profileData = {
+            ...data,
+            User_id: user?._id 
+        };
+    
+        console.log("Submitting Profile Data:", profileData);
+    
         try {
-            const userId = user?._id;
-            if (!userId) {
-                toast.error("User ID is required!");
-                return;
-            }
-    
-            const profileData = { ...data, User_id: userId };
-    
             if (existingProfile?._id) {
-                // Update profile
                 await updateProfile(profileData);
                 toast.success("Profile updated successfully!");
             } else {
-                // Create profile
                 await createProfile(profileData);
                 toast.success("Profile created successfully!");
             }
-            reset()
-            router.push(`/profile/${userId}`);
+            reset();
+            router.push(`/profile/${user._id}`);
         } catch (error) {
+            console.error("Profile Save Error:", error);
             toast.error(error.message || "Failed to save profile.");
         }
     };
     
-
     return (
         <Container maxWidth="md" className="py-8">
             <motion.div initial="hidden" animate="visible" variants={cardVariants}>
