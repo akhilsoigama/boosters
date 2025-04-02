@@ -65,11 +65,10 @@ export async function PATCH(request, { params }) {
   try {
       const body = await request.json();
       const { phoneNo, bio, gender, github, youtube, linkedin, address, dob, profilePicture } = body;
-      const { name } = params; // Extracting `name` from URL params
+      const { name } = params;
 
-      // Find user profile by name
       const updatedProfile = await Profile.findOneAndUpdate(
-          { name }, // Match by `name` instead of `User_id`
+          { name }, 
           { $set: { phoneNo, bio, gender, github, youtube, linkedin, address, dob, profilePicture } },
           { new: true }
       );
