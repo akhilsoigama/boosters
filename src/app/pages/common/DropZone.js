@@ -66,57 +66,23 @@ const ImageDropZone = ({
     const { getRootProps, getInputProps } = useDropzone(dropzoneProps);
 
     useEffect(() => {
-        if (!value) {
+        if (value) {
+            setImage({
+                preview: value,  
+                file: null,
+            });
+        } else {
             setImage(null);
         }
     }, [value]);
 
     useEffect(() => {
         return () => {
-            if (image?.preview) {
+            if (image?.preview && image?.file) {
                 URL.revokeObjectURL(image.preview);
             }
         };
     }, [image]);
-
-    const renderPreview = useMemo(() => {
-        if (image) {
-            return (
-                <Box className="w-full text-center">
-                    <Box className="relative">
-                        <img
-                            src={image.preview}
-                            alt="Preview"
-                            className="w-full h-auto md:h-96 object-cover rounded-lg mx-auto"
-                        />
-                        <IconButton
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onChange(null);
-                            }}
-                            className="absolute top-2 right-2 bg-white hover:bg-gray-100"
-                            size="small"
-                        >
-                            <DeleteIcon className="text-red-500" />
-                        </IconButton>
-                    </Box>
-                </Box>
-            );
-        }
-
-        return (
-            <Box>
-                <img
-                    src="https://i.pinimg.com/originals/56/74/51/5674515621e872310e356243db78b14f.gif"
-                    alt="Upload Placeholder"
-                    className="w-full h-32 object-contain"
-                />
-                <Typography variant="body1" className="mt-2 text-gray-500">
-                    {placeholderText}
-                </Typography>
-            </Box>
-        );
-    }, [image, onChange, placeholderText]);
 
     return (
         <Box>
@@ -125,7 +91,37 @@ const ImageDropZone = ({
                 className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 transition-colors duration-300"
             >
                 <input {...getInputProps()} />
-                {renderPreview}
+                {image ? (
+                    <Box className="relative">
+                        <img
+                            src={image.preview}
+                            alt="Uploaded Preview"
+                            className="w-full h-40 object-cover rounded-lg"
+                        />
+                        <IconButton
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onChange(null);
+                                setImage(null);
+                            }}
+                            className="absolute top-2 right-2 bg-white hover:bg-gray-100"
+                            size="small"
+                        >
+                            <DeleteIcon className="text-red-500" />
+                        </IconButton>
+                    </Box>
+                ) : (
+                    <Box>
+                        <img
+                            src="https://i.pinimg.com/originals/56/74/51/5674515621e872310e356243db78b14f.gif"
+                            alt="Upload Placeholder"
+                            className="w-full h-32 object-contain"
+                        />
+                        <Typography variant="body1" className="mt-2 text-gray-500">
+                            {placeholderText}
+                        </Typography>
+                    </Box>
+                )}
             </Box>
         </Box>
     );

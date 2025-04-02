@@ -27,7 +27,7 @@ export function usePosts() {
   const refreshPosts = useCallback(() => mutate(), [mutate]);
 
   return useMemo(() => ({
-    posts: data ? shuffleArray(data) : [],
+    posts: data ? shuffleArray(data) : [], 
     postsError: error,
     isLoading: !data && !error,
     isValidating,
