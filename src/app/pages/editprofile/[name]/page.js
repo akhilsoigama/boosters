@@ -1,4 +1,3 @@
-import Sidebar from '@/app/components/Sidebar'
 import BottomNavbar from '@/app/components/BottomNavbar'
 import EditProfile from './EditProfile'
 import { use } from 'react'
@@ -7,9 +6,8 @@ const page = ({ params }) => {
     const{name}=use(params)
     
     return (
-        <div className='relative w-full h-screen'>
-                <div className='w-full flex flex-col'>
-                    {/* <Sidebar /> */}
+        <div className='relative w-full  pb-10 scrollbar-hide bg-slate-950'>
+                <div className='w-full flex flex-col scrollbar-hide overflow-auto '>
                     <EditProfile name={name} />
                 </div>
                 <BottomNavbar />

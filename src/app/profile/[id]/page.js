@@ -12,7 +12,7 @@ const Page = ({ params }) => {
   const renderedPosts = useMemo(() => <Posts ids={id} />, [id]);
 
   return (
-    <div className='relative w-full h-screen'>
+    <div className='relative w-full bg-gradient-to-b dark:from-gray-950 dark:to-gray-950 h-screen'>
       <div className='w-full flex flex-col'>
         <Sidebar />
         <UserProfile />

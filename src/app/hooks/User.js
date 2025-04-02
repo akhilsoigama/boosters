@@ -1,5 +1,4 @@
-// useAuth.js
-"use client";  // ✅ Add this at the top
+"use client"; 
 
 import axios from "axios";
 import useSWR from "swr";
@@ -15,7 +14,7 @@ export const logoutUser = async () => {
 export function useAuth() {
     const { data, error, isValidating, mutate } = useSWR(
         "/api/auth/check-auth",
-        async (url) => {  // ✅ Function ko async karo
+        async (url) => { 
             const res = await axios.get(url, { withCredentials: true });
             return res.data;
         },
