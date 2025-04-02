@@ -23,40 +23,57 @@ export async function GET(req) {
       return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
   }
-export async function POST(request) {
+
+  export async function POST(request) {
     await connectDB();
+
     try {
         const body = await request.json();
-        const { name,phoneNo, bio, gender, github, youtube, linkedin, address, dob, profilePicture, User_id } = body;
-        const mongoose = require("mongoose");
-        const userObjectId = mongoose.Types.ObjectId.isValid(User_id) ? new mongoose.Types.ObjectId(User_id) : null;
-        if (!userObjectId) {
+        const { name, phoneNo, bio, gender, github, youtube, linkedin, address, dob, profilePicture, User_id } = body;
+
+        if (!User_id || !mongoose.Types.ObjectId.isValid(User_id)) {
+            console.error("Invalid or missing User ID");
             return NextResponse.json({ message: "Invalid User ID format" }, { status: 400 });
         }
+        const userObjectId = new mongoose.Types.ObjectId(User_id);
 
-        const dobDate = new Date(dob);
-        if (dobDate > new Date()) {
+        console.log("Converted User ObjectId:", userObjectId);
+
+        const existingProfile = await Profile.findOne({ User_id: userObjectId });
+        console.log("Existing Profile:", existingProfile);
+
+        if (existingProfile) {
+            return NextResponse.json({ message: "Profile already exists for this user" }, { status: 409 });
+        }
+
+        const dobDate = dob ? new Date(dob) : null;
+        if (dobDate && dobDate > new Date()) {
             return NextResponse.json({ message: "Date of birth cannot be in the future" }, { status: 400 });
         }
 
-        const newProfile = new Profile({
-            phoneNo,
-            name,
-            bio,
-            gender,
-            github,
-            youtube,
-            linkedin,
-            address,
-            dob: dobDate,
-            profilePicture,
-            User_id: userObjectId,
-        });
-
+        const newProfileData = {
+          phoneNo,
+          name,
+          bio,
+          gender,
+          github,
+          youtube,
+          linkedin,
+          address,
+          dob: dobDate,
+          profilePicture,
+          User_id: userObjectId,  
+      };
+      console.log("New Profile Data Before Save:", newProfileData);
+      
+      const newProfile = new Profile(newProfileData);
+      
         await newProfile.save();
-        return NextResponse.json({ message: 'Profile has been created', newProfile }, { status: 201 });
+        return NextResponse.json({ message: "Profile has been created", newProfile }, { status: 201 });
+
     } catch (error) {
-        return NextResponse.json({ message: 'Internal server error', error: error.message }, { status: 500 });
+        console.error("Internal Server Error:", error);
+        return NextResponse.json({ message: "Internal server error", error: error.message }, { status: 500 });
     }
 }
 

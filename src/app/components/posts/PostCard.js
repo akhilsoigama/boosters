@@ -7,10 +7,11 @@ import MarkdownPreview from "@/app/pages/common/MarkdownPreview";
 import CommentModal from "./CommentModel";
 import { usePathname } from "next/navigation";
 import { useUser } from "@/app/contaxt/userContaxt";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
 import axios from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const PostCard = ({ post, liked, likeCount, commentCount }) => {
   const { handleLikeToggle } = usePost();
@@ -25,10 +26,10 @@ const PostCard = ({ post, liked, likeCount, commentCount }) => {
 
   const handleDelete = async (postId) => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
-  
+
     try {
       const res = await axios.delete(`/api/post/${postId}`);
-  
+
       if (res.status === 200) {
         toast.success("Post deleted successfully");
         window.location.reload();
@@ -39,7 +40,6 @@ const PostCard = ({ post, liked, likeCount, commentCount }) => {
       toast.error("Error deleting post");
     }
   };
-
 
   return (
     <>
@@ -54,52 +54,53 @@ const PostCard = ({ post, liked, likeCount, commentCount }) => {
           transition-shadow duration-100
         "
       >
-        <CardHeader
-          avatar={
-            <Avatar
-              className="
+        <Link href={`/profile/${post.User_id?._id}`}>
+          <CardHeader
+            avatar={
+              <Avatar
+                className="
                 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 
                 dark:from-indigo-600 dark:via-purple-600 dark:to-pink-600 
                 shadow-lg ring-2 ring-offset-2 ring-indigo-300 dark:ring-indigo-700
               "
-            >
-              {post.User_id?.fullName?.charAt(0).toUpperCase() || "U"}
-            </Avatar>
-          }
-          title={
-            <span className="font-semibold text-gray-900 dark:text-indigo-100 tracking-tight">
-              {post.User_id?.fullName || "Unknown User"}
-            </span>
-          }
-          subheader={
-            <span className="text-sm text-gray-600 dark:text-indigo-300">
-              {post.User_id?.email || ""}
-            </span>
-          }
-          className="
+              >
+                {post.User_id?.fullName?.charAt(0).toUpperCase() || "U"}
+              </Avatar>
+            }
+            title={
+              <span className="font-semibold text-gray-900 dark:text-indigo-100 tracking-tight">
+                {post.User_id?.fullName || "Unknown User"}
+              </span>
+            }
+            subheader={
+              <span className="text-sm text-gray-600 dark:text-indigo-300">
+                {post.User_id?.email || ""}
+              </span>
+            }
+            className="
             bg-gradient-to-r from-gray-100 to-blue-50 
             dark:from-gray-800 dark:via-indigo-900 dark:to-gray-900 
             px-4 py-2 
             border-b border-gray-200 dark:border-indigo-800
           "
-          action={
-            isSpecificRoute && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <IconButton className="text-gray-700 dark:text-indigo-200 hover:bg-gray-200 dark:hover:bg-indigo-800 p-2 h-[40px] w-[40px] rounded-full shadow-md">
-                    <MoreVert />
-                  </IconButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => router.push(`/pages/createPost?postId=${post._id}`)}>Edit</DropdownMenuItem>
-                  <DropdownMenuItem  onClick={() => router.push(`/pages/${post._id}`)}>View</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleDelete(post._id)}>Delete</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )
-          }
-        />
-
+            action={
+              isSpecificRoute && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <IconButton className="text-gray-700 dark:text-indigo-200 hover:bg-gray-200 dark:hover:bg-indigo-800 p-2 h-[40px] w-[40px] rounded-full shadow-md">
+                      <MoreVert />
+                    </IconButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => router.push(`/pages/createPost?postId=${post._id}`)}>Edit</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push(`/pages/${post._id}`)}>View</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDelete(post._id)}>Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )
+            }
+          />
+        </Link>
         {post.image && (
           <div className="w-full max-h-[350px] overflow-hidden flex justify-center items-center ">
             <img
