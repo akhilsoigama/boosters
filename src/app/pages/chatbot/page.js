@@ -1,6 +1,8 @@
-import Chatbot from "@/app/components/Chatbot/chatbot"
+'use client'
 import { Button } from "@mui/material"
+import dynamic from "next/dynamic";
 import Link from "next/link"
+const Chatbot = dynamic(() => import('../../components/Chatbot/chatbot'), { ssr: false });
 
 const page = () => {
     return (
