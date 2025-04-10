@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { List, ListItem, IconButton } from '@mui/material';
-import { Home, People, Mail, Settings } from '@mui/icons-material';
+import { Home, Mail, Settings } from '@mui/icons-material';
 import { bounce, sidebarVariants, slideInUp } from './motion/motion';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import Image from 'next/image';
@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { ModeToggle } from '../ModeToggle';
 import { DropdownMenuDemo } from './profile/Profile';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-
+import ChatIcon from '@mui/icons-material/Chat';
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -20,7 +20,7 @@ const Sidebar = () => {
 
   const menuItems = useMemo(() => [
     { text: 'Home', icon: <Home />, link: '/' },
-    { text: 'Friends', icon: <People />, link: '' },
+    { text: 'AI chatbot', icon: <ChatIcon />, link: '/pages/chatbot' },
     { text: 'Create Post', icon: <AddCircleIcon />, link: '/pages/createPost' },
     { text: 'Messages', icon: <Mail />, link: '' },
     { text: 'Settings', icon: <Settings />, link: '' },
