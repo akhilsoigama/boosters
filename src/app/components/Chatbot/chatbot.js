@@ -9,9 +9,7 @@ const fetcher = (url, { arg }) =>
     axios.post(url, arg).then((res) => res.data);
 
 const Chatbot = () => {
-    const [messages, setMessages] = useState(() => {
-        return JSON.parse(localStorage.getItem('chatMessages')) || [];
-    });
+    const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [quizMode, setQuizMode] = useState(false);
     const [currentQuestion, setCurrentQuestion] = useState(null);
@@ -19,23 +17,22 @@ const Chatbot = () => {
 
     // SWR Mutations
     const { trigger: sendMessage, isMutating: isLoading } = useSWRMutation(
-        'http://localhost:5000/chat',
+        'https://python-chatbot-beta.vercel.app/chat',
         fetcher
     );
 
     const { trigger: fetchQuestion } = useSWRMutation(
-        'http://localhost:5000/random-kids-question',
+        'https://python-chatbot-beta.vercel.app/random-kids-question',
         fetcher
     );
 
     const { trigger: checkAnswer } = useSWRMutation(
-        'http://localhost:5000/check-answer',
+        'https://python-chatbot-beta.vercel.app/check-answer',
         fetcher
     );
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        localStorage.setItem('chatMessages', JSON.stringify(messages));
     }, [messages]);
 
     useEffect(() => {
