@@ -6,6 +6,7 @@ import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import Link from 'next/link';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useUser } from '../contaxt/userContaxt';
+import ChatIcon from '@mui/icons-material/Chat';
 const BottomNavbar = () => {
   const { user } = useUser()
   const userId = user ? user._id : ''
@@ -18,7 +19,7 @@ const BottomNavbar = () => {
   }
   const menuItems = [
     { text: 'Home', icon: <Home />, link: '/' },
-    { text: 'Friends', icon: <People />, link: '' },
+    { text: 'AI chatbot', icon: <ChatIcon/>, link: '/pages/chatbot' },
     { text: 'create post', icon: <AddCircleIcon className='text-3xl' />, link: '/pages/createPost' },
     { text: 'Settings', icon: <Settings />, link: '' },
     { text: 'Profile', icon: <ProfileLogo user={user} />, link: `/profile/${userId} ` },
