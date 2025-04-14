@@ -7,7 +7,7 @@ const axiosInstance = axios.create({
     "Content-Type": "application/json",
   },
 });
-
+console.log(process.env.NEXT_CHATBOT_LINK)
 const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);
 
 export const useChatbotData = (endpoint) => {
