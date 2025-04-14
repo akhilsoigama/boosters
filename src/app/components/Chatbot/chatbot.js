@@ -17,22 +17,23 @@ const Chatbot = () => {
 
     // SWR Mutations
     const { trigger: sendMessage, isMutating: isLoading } = useSWRMutation(
-        'https://python-chatbot-beta.vercel.app/chat',
+        'http://localhost:5000/chat',
         fetcher
     );
 
     const { trigger: fetchQuestion } = useSWRMutation(
-        'https://python-chatbot-beta.vercel.app/random-kids-question',
+        'http://localhost:5000/random-kids-question',
         fetcher
     );
 
     const { trigger: checkAnswer } = useSWRMutation(
-        'https://python-chatbot-beta.vercel.app/check-answer',
+        'http://localhost:5000/check-answer',
         fetcher
     );
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        localStorage.setItem('chatMessages', JSON.stringify(messages));
     }, [messages]);
 
     useEffect(() => {
@@ -61,10 +62,21 @@ const Chatbot = () => {
                 await verifyAnswer(inputValue);
             } else {
                 const data = await sendMessage({ message: inputValue });
-                addBotMessage(data.response);
+                addBotMessage(data.response, data.image);
             }
         } catch {
             addBotMessage("Sorry, I'm having trouble connecting to the server.");
+        }
+    };
+
+    const getNewQuestion = async () => {
+        try {
+            const question = await fetchQuestion();
+            console.log(question)
+            setCurrentQuestion(question);
+            addBotMessage(question.question, question.image);
+        } catch {
+            addBotMessage('Failed to fetch a new question. Please try again.');
         }
     };
 
@@ -78,9 +90,9 @@ const Chatbot = () => {
             });
 
             if (data.correct) {
-                addBotMessage(`✅ Correct! ${currentQuestion.answer} is right!`);
+                addBotMessage(`✅ Correct! ${currentQuestion.answer} is right!`, data.image);
             } else {
-                addBotMessage(`❌ Not quite! The correct answer is: ${data.correct_answer}`);
+                addBotMessage(`❌ Not quite! The correct answer is: ${data.correct_answer}`, data.image);
             }
 
             await getNewQuestion();
@@ -89,8 +101,12 @@ const Chatbot = () => {
         }
     };
 
-    const addBotMessage = (text) => {
-        setMessages((prev) => [...prev, { text, sender: 'bot' }]);
+    const addBotMessage = (text, imageUrl = null) => {
+        const newMessage = { text, sender: 'bot' };
+        if (imageUrl) {
+            newMessage.image = imageUrl;
+        }
+        setMessages((prev) => [...prev, newMessage]);
     };
 
     const handleKeyPress = (e) => {
@@ -126,7 +142,6 @@ const Chatbot = () => {
                 >
                     Clear Chat
                 </Button>
-
             </div>
 
             <div className="flex-1 p-4 overflow-y-auto scrollbar-hide bg-gray-50">
@@ -142,12 +157,25 @@ const Chatbot = () => {
                             className={`mb-3 flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                             <div
-                                className={`max-w-xs md:max-w-md rounded-lg px-4 py-2 ${message.sender === 'user'
+                                className={`max-w-xs md:max-w-md rounded-lg px-4 py-2 ${
+                                    message.sender === 'user'
                                         ? 'bg-blue-500 text-white rounded-br-none'
                                         : 'bg-gray-200 text-gray-800 rounded-bl-none'
-                                    }`}
+                                }`}
                             >
                                 {message.text}
+                                {message.image && (
+                                    <div className="mt-2">
+                                        <img
+                                            src={message.image}
+                                            alt="Response visual"
+                                            className="rounded-lg max-w-full h-auto"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                            }}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </motion.div>
                     ))}
@@ -161,9 +189,7 @@ const Chatbot = () => {
                                     <motion.div
                                         key={i}
                                         className="w-2 h-2 bg-gray-500 rounded-full"
-                                        animate={{
-                                            y: [0, -5, 0],
-                                        }}
+                                        animate={{ y: [0, -5, 0] }}
                                         transition={{
                                             repeat: Infinity,
                                             duration: 1.2,
@@ -178,7 +204,6 @@ const Chatbot = () => {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
             <motion.div className="p-3 border-t border-gray-200 bg-white" layout>
                 <div className="flex gap-2">
                     <TextField
@@ -191,7 +216,13 @@ const Chatbot = () => {
                         placeholder={quizMode ? 'Type your answer...' : 'Type your message...'}
                         className="flex-1"
                     />
-                    <Button variant="contained" color="primary" onClick={handleSendMessage} disabled={isLoading} className="shadow-md">
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleSendMessage}
+                        disabled={isLoading}
+                        className="shadow-md"
+                    >
                         {isLoading ? '...' : 'Send'}
                     </Button>
                 </div>
