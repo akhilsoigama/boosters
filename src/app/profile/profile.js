@@ -8,29 +8,33 @@ import { useUser } from '../contaxt/userContaxt';
 import { useProfiles } from '../hooks/Profile';
 import Link from 'next/link';
 import { HoverScale } from '../components/motion/motion';
-import { Edit, GitHub, YouTube, LinkedIn, Instagram } from '@mui/icons-material';
+import { Edit, GitHub, YouTube, LinkedIn } from '@mui/icons-material';
 
 const UserProfile = () => {
     const router = useRouter();
     const { user } = useUser();
-    const { profiles, isLoading } = useProfiles(user?._id);
+    const { profiles, isLoading } = useProfiles();
     const profile = useMemo(() => {
         if (!user?._id || !profiles) return null;
     
-        const userProfile = profiles.find(p => String(p.User_id._id) === String(user._id));
+        const userProfile = profiles.find(p => String(p?.userId?._id) === String(user._id));
     
         return userProfile
             ? {
                 fullName: userProfile.name || user?.fullName || "User",
                 bio: userProfile.bio || user?.bio || "Tell people about yourself",
-                avatar: userProfile.profilePicture || user?.avatar || "",
+                avatar: userProfile.avatar || user?.avatar || "",
                 followers: userProfile.followers || user?.followers || "0",
                 following: userProfile.following || user?.following || "0",
                 posts: userProfile.posts || user?.posts || "0",
+                github: userProfile.github || "",
+                youtube: userProfile.youtube || "",
+                linkedin: userProfile.linkedin || "",
             }
             : null;
     }, [profiles, user]);
     
+
     const firstLetter = useMemo(() => profile?.fullName?.charAt(0).toUpperCase() || 'U', [profile?.fullName]);
 
     const userStats = useMemo(() => (
@@ -51,7 +55,7 @@ const UserProfile = () => {
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg dark:shadow-gray-800/30 overflow-hidden border border-gray-200 dark:border-gray-700">
                 <div className="p-6">
                     <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
-                 
+
                         <Avatar className="w-32 h-32 sm:w-36 sm:h-36 shadow-lg">
                             <AvatarImage
                                 src={profile?.avatar}
@@ -78,8 +82,11 @@ const UserProfile = () => {
                                         variant="outlined"
                                         size="small"
                                         startIcon={<Edit />}
-                                        className="hidden sm:flex border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-gray-800 dark:border-blue-400 dark:text-blue-400"
-                                        onClick={() => router.push(`/pages/editprofile/${user?.fullName || ''}`)}
+                                        className="border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-gray-800 dark:border-blue-400 dark:text-blue-400"
+                                        onClick={() => {
+                                            const id = profiles?.find(p => String(p?.userId?._id) === String(user?._id))?._id || user?._id;
+                                            router.push(`/pages/editprofile/${id}`);
+                                        }}
                                     >
                                         Edit Profile
                                     </Button>
@@ -94,36 +101,39 @@ const UserProfile = () => {
                             </Typography>
 
                             <div className="flex gap-2 pt-2 justify-center sm:justify-start">
-                                <Tooltip title="GitHub" arrow>
-                                    <Link href="https://github.com" target="_blank" passHref>
-                                        <HoverScale>
-                                            <IconButton size="small" className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700">
-                                                <GitHub className="text-gray-700 dark:text-gray-300 text-lg" />
-                                            </IconButton>
-                                        </HoverScale>
-                                    </Link>
-                                </Tooltip>
-
-                                <Tooltip title="YouTube" arrow>
-                                    <Link href="https://youtube.com" target="_blank" passHref>
-                                        <HoverScale>
-                                            <IconButton size="small" className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700">
-                                                <YouTube className="text-red-600 dark:text-red-400 text-lg" />
-                                            </IconButton>
-                                        </HoverScale>
-                                    </Link>
-                                </Tooltip>
-
-                                <Tooltip title="LinkedIn" arrow>
-                                    <Link href="https://linkedin.com" target="_blank" passHref>
-                                        <HoverScale>
-                                            <IconButton size="small" className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700">
-                                                <LinkedIn className="text-blue-700 dark:text-blue-400 text-lg" />
-                                            </IconButton>
-                                        </HoverScale>
-                                    </Link>
-                                </Tooltip>
-
+                                {profile?.github && (
+                                    <Tooltip title="GitHub" arrow>
+                                        <Link href={profile.github} target="_blank" passHref>
+                                            <HoverScale>
+                                                <IconButton size="small" className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700">
+                                                    <GitHub className="text-gray-700 dark:text-gray-300 text-lg" />
+                                                </IconButton>
+                                            </HoverScale>
+                                        </Link>
+                                    </Tooltip>
+                                )}
+                                {profile?.youtube && (
+                                    <Tooltip title="YouTube" arrow>
+                                        <Link href={profile.youtube} target="_blank" passHref>
+                                            <HoverScale>
+                                                <IconButton size="small" className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700">
+                                                    <YouTube className="text-red-600 dark:text-red-400 text-lg" />
+                                                </IconButton>
+                                            </HoverScale>
+                                        </Link>
+                                    </Tooltip>
+                                )}
+                                {profile?.linkedin && (
+                                    <Tooltip title="LinkedIn" arrow>
+                                        <Link href={profile.linkedin} target="_blank" passHref>
+                                            <HoverScale>
+                                                <IconButton size="small" className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700">
+                                                    <LinkedIn className="text-blue-700 dark:text-blue-400 text-lg" />
+                                                </IconButton>
+                                            </HoverScale>
+                                        </Link>
+                                    </Tooltip>
+                                )}
                             </div>
 
                             <div className="sm:hidden flex justify-center pt-2">
@@ -132,7 +142,10 @@ const UserProfile = () => {
                                     size="small"
                                     startIcon={<Edit />}
                                     className="border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-gray-800 dark:border-blue-400 dark:text-blue-400"
-                                    onClick={() => router.push(`/pages/editprofile/${user?.fullName || ''}`)}
+                                    onClick={() => {
+                                        const id = profiles?.find(p => String(p?.userId?._id) === String(user?._id))?._id || user?._id;
+                                        router.push(`/pages/editprofile/${id}`);
+                                    }}
                                 >
                                     Edit Profile
                                 </Button>

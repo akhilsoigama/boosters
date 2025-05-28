@@ -1,12 +1,12 @@
 'use client'
 import { motion } from 'framer-motion';
-import { Home, People, Settings } from '@mui/icons-material';
+import { Home,  Settings } from '@mui/icons-material';
 import { bounce, fadeIn, slideInLeft } from './motion/motion';
-import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import Link from 'next/link';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useUser } from '../contaxt/userContaxt';
 import ChatIcon from '@mui/icons-material/Chat';
+
 const BottomNavbar = () => {
   const { user } = useUser()
   const userId = user ? user._id : ''
