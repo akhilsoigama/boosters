@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { fieldVariants } from '@/app/components/motion/motion';
 
 export const AvatarUpload = ({ control, setValue }) => {
-    const [preview, setPreview] = useState(control._formValues.profilePicture || '');
+    const [preview, setPreview] = useState(control._formValues.avatar|| '');
 
     const handleImageUpload = (e) => {
         const file = e.target.files?.[0];
@@ -24,7 +24,7 @@ export const AvatarUpload = ({ control, setValue }) => {
             reader.onload = (event) => {
                 const base64String = event.target?.result;
                 setPreview(base64String);
-                setValue('profilePicture', base64String);
+                setValue('avatar', base64String);
             };
             reader.readAsDataURL(file);
         }
@@ -35,7 +35,7 @@ export const AvatarUpload = ({ control, setValue }) => {
             <Box className="flex flex-col items-center space-y-4">
                 <Avatar
                     src={preview}
-                    alt="Profile Picture"
+                    alt="avatar"
                     sx={{ width: 100, height: 100 }}
                     className="border-2 border-gray-300"
                 />

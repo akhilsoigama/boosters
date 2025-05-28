@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const profileSchema = new mongoose.Schema(
     {
         name: { type: String, trim: true },
-        profilePicture: { type: String, default: '', trim: true },
+        avatar: { type: String, default: '', trim: true },
         bio: { type: String, default: '', trim: true },
         gender: { type: String, enum: ['Male', 'Female', 'Other'], default: 'Other' },
         phoneNo: {
@@ -26,16 +26,16 @@ const profileSchema = new mongoose.Schema(
         github: { type: String, default: '', trim: true, match: [/^https?:\/\/(www\.)?github\.com\/.+$/, "Invalid GitHub URL"] },
         youtube: { type: String, default: '', trim: true, match: [/^https?:\/\/(www\.)?youtube\.com\/.+$/, "Invalid YouTube URL"] },
         linkedin: { type: String, default: '', trim: true, match: [/^https?:\/\/(www\.)?linkedin\.com\/.+$/, "Invalid LinkedIn URL"] },
-        User_id: {
+        userId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User",  
+            ref: "User",
             required: true,
             unique: true,
-            sparse: true
-        },
+          },
     },
     { timestamps: true }
 );
+profileSchema.index({ userId: 1 }, { unique: true });
 
 const Profile = mongoose.models.Profile || mongoose.model('Profile', profileSchema);
 

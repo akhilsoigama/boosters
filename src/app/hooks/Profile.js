@@ -1,46 +1,46 @@
-import useSWR from "swr";
-import axios from "axios";
-import { toast } from "sonner";
+import useSWR from 'swr';
+import axios from 'axios';
+import { toast } from 'sonner';
 
-const fetcher = async (url) => {
+const fetcher = url => axios.get(url).then(res => res.data);
+
+export function useProfiles() {
+  const { data: profiles, error, mutate } = useSWR('/api/profile', fetcher);
+
+  const isLoading = !profiles && !error;
+  const createProfile = async (profileData) => {
     try {
-        const res = await axios.get(url);
-        return res.data;
-    } catch (error) {
-        throw new Error(error.response?.data?.message || 'Failed to fetch posts');
+      const res = await axios.post('/api/profile', profileData);
+      toast.success('Profile created');
+      mutate(prev => (prev ? [...prev, res.data.newProfile] : [res.data.newProfile]), false);
+      return res.data;
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to create profile');
+      throw err;
     }
-};
-export function useProfiles(userId) {
-    const { data, error, isLoading, mutate } = useSWR(
-        userId ? `/api/profile` : null,
-        fetcher
-    );
-    const createProfile = async (profileData) => {
-        try {
-            const response = await axios.post("/api/profile", profileData);
-            mutate([...data?.data ?? [], response.data.newProfile], false);
-            toast.success("Saved profile");
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.message || "Failed to create profile");
-        }
-    };
-    const updateProfile = async (updatedData) => {
-        try {
-            const response = await axios.patch(`/api/profile`, updatedData);
-            mutate(`/api/profile`, response.data.updatedProfile, false);
-            toast.success("Profile updated successfully!");
-            return response.data;
-        } catch (err) {
-            toast.error(err.response?.data?.message || "Error updating profile");
-            throw err;
-        }
-    };
-    return {
-        profiles: data ?? [],
-        isLoading,
-        isError: !!error,
-        createProfile,
-        updateProfile
-    };
+  };
+  
+  const updateProfile = async ({ id, ...updatedData }) => {
+    try {
+      const res = await axios.patch(`/api/profile/${id}`, updatedData);
+      toast.success('Profile updated');
+      mutate(prev => {
+        if (!prev) return prev;
+        return prev.map(p => (p._id === id ? res.data.profile : p));
+      }, false);
+      return res.data;
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update profile');
+      throw err;
+    }
+  };
+
+  return {
+    profiles,
+    isLoading,
+    createProfile,
+    updateProfile,
+    error,
+    mutate,
+  };
 }

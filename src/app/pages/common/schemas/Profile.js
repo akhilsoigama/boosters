@@ -2,7 +2,7 @@ const { z } = require("zod");
 
 const profileSchema = z.object({
     name:z.string(),
-    profilePicture: z.string().optional(),
+    avatar: z.string().optional(),
     bio: z.string().optional().nullable(),
     address: z.string().optional().nullable(),  
     gender: z.enum(['Male', 'Female', 'Other']).optional(),
@@ -11,7 +11,7 @@ const profileSchema = z.object({
     github: z.string().url().optional().nullable(),
     youtube: z.string().url().optional().nullable(),
     linkedin: z.string().url().optional().nullable(),
-    User_id: z.string().optional()
+    userId: z.string().optional()
 });
 
 module.exports = { profileSchema };
