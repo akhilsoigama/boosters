@@ -22,7 +22,7 @@ const postSchema = new mongoose.Schema({
     ref: 'User', 
     required:true  
   },
-});
+},{ timestamps: true });
 
 const Post = mongoose.models.Posts || mongoose.model('Posts', postSchema);
 module.exports = Post;

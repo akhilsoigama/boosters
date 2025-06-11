@@ -18,12 +18,9 @@ const Posts = ({ ids }) => {
       const response = await axios.get('/api/post', {
         params: { User_Id: user._id, limit: 20 }
       });
-
       if (response.data?.length > 0) {
         setPosts(response.data);
-      } else {
-        toast.error('No posts found');
-      }
+      } 
     } catch (error) {
       toast.error(error?.response?.data?.message || 'Failed to fetch posts');
     } finally {
@@ -35,13 +32,7 @@ const Posts = ({ ids }) => {
     if (user?._id) fetchPosts();
   }, [user, ids]);
 
-  const handleOpenComment = (post) => {
-    setOpenCommentPost(post);
-  };
 
-  const handleCloseComment = () => {
-    setOpenCommentPost(null);
-  };
 
   const renderedPosts = useMemo(() => (
     posts.map((post, i) => (
@@ -54,7 +45,6 @@ const Posts = ({ ids }) => {
       >
         <PostCard
           post={post}
-          handleOpenComment={handleOpenComment}
         />
       </motion.div>
     ))
