@@ -65,7 +65,7 @@ const PostForm = ({ postId }) => {
   return (
     <Box
       className="max-w-4xl w-full mx-auto rounded-2xl shadow-lg transition-all duration-300
-                 bg-white dark:bg-zinc-900 px-4 py-6 sm:px-8 sm:py-10"
+                 bg-white dark:bg-zinc-900 mb-10 px-4 py-6 sm:px-8 sm:py-10"
     >
       {/* Back Button */}
       <div className="mb-6">

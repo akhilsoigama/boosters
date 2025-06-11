@@ -21,14 +21,15 @@ export async function POST(request) {
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    cookies().set({
+    const cookieStore = await cookies(); 
+    cookieStore.set({
       name: 'token',
       value: token,
       httpOnly: true,
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, 
+      maxAge: 7 * 24 * 60 * 60,
     });
 
     return NextResponse.json({ message: 'Login successful' }, { status: 200 });
