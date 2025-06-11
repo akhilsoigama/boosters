@@ -14,9 +14,16 @@ export const UserProvider = ({ children }) => {
     const pathname = usePathname();
 
     useEffect(() => {
-        if (isLoading) return; // Wait until loading finishes
-        if (!isLoggedIn && pathname !== '/Auth/login') {
-            router.replace('/Auth/login'); // Prevent unnecessary history entries
+        if (isLoading) return;
+
+        const authRoutes = ['/Auth/login', '/Auth/signup'];
+
+        if (isLoggedIn && authRoutes.includes(pathname)) {
+            router.replace('/');
+        }
+
+        if (!isLoggedIn && !authRoutes.includes(pathname)) {
+            router.replace('/Auth/login');
         }
     }, [isLoading, isLoggedIn, pathname, router]);
 
@@ -24,10 +31,10 @@ export const UserProvider = ({ children }) => {
         try {
             await logoutUser();
             Cookies.remove('token');
-            await mutate(null, false); // Immediately clear SWR cache without re-fetching
+            await mutate(null, false);
             router.replace('/Auth/login');
         } catch (error) {
-            toast.error(`❌ Error logging out: ${error.message}`);
+            toast.error(`Error logging out: ${error.message}`);
         }
     };
 
@@ -39,7 +46,11 @@ export const UserProvider = ({ children }) => {
         handleLogout,
     }), [user, isLoggedIn, isLoading, authError]);
 
-    return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
+    return (
+        <UserContext.Provider value={contextValue}>
+            {children}
+        </UserContext.Provider>
+    );
 };
 
 export const useUser = () => useContext(UserContext);
