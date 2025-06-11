@@ -42,7 +42,7 @@ export const PostProvider = ({ children }) => {
         });
 
         socketRef.current.on('post-commented', (data) => {
-            toast.success(`New comment on post: ${data.postId}`);
+            // toast.success(`New comment on post: ${data.postId}`);
         });
 
         return () => {

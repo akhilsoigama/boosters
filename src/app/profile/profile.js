@@ -56,11 +56,11 @@ const UserProfile = () => {
                 <div className="p-6">
                     <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
 
-                        <Avatar className="w-32 h-32 sm:w-36 sm:h-36 shadow-lg">
+                        <Avatar className="w-32 h-32 sm:w-36 sm:h-36 shadow-lg ">
                             <AvatarImage
                                 src={profile?.avatar}
                                 alt={profile?.fullName}
-                                className="rounded-lg object-cover border-4 border-white dark:border-gray-700 shadow-md"
+                                className="rounded-lg object-cover border-4  border-white dark:border-gray-700 shadow-md"
                             />
                             <AvatarFallback className="w-full h-full flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white text-4xl font-bold">
                                 {firstLetter}
