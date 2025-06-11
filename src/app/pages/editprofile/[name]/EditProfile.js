@@ -19,6 +19,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useProfiles } from '@/app/hooks/Profile';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { ReplyIcon } from 'lucide-react';
 
 const EditProfile = () => {
   const router = useRouter();
@@ -49,11 +50,10 @@ const EditProfile = () => {
     { value: 'Other', label: 'Other' },
   ], []);
 
-  const { control, handleSubmit, setValue, reset ,formState:{isSubmitting,errors}} = useForm({
+  const { control, handleSubmit, setValue, reset, formState: { isSubmitting, errors } } = useForm({
     defaultValues,
     resolver: zodResolver(profileSchema),
   });
-  console.log('errros',errors)
 
   useEffect(() => {
     if (existingProfile) {
@@ -80,10 +80,8 @@ const EditProfile = () => {
     try {
       if (existingProfile?._id) {
         await updateProfile({ id: existingProfile._id, ...profileData });
-        toast.success("Profile updated successfully!");
       } else {
         await createProfile(profileData);
-        toast.success("Profile created successfully!");
       }
 
       reset();
@@ -97,7 +95,7 @@ const EditProfile = () => {
   if (!user?._id) {
     return (
       <Container maxWidth="md" className="py-8">
-        <Typography variant="h6" className="text-center">Loading user info...</Typography>
+        <Typography variant="h6" className="text-center dark:text-white text-gray-900">Loading user info...</Typography>
       </Container>
     );
   }
@@ -105,10 +103,20 @@ const EditProfile = () => {
   return (
     <Container maxWidth="md" className="py-8">
       <motion.div initial="hidden" animate="visible" variants={cardVariants}>
-        <Card className="shadow-lg">
+        <Card className="shadow-lg dark:bg-gray-900 bg-white dark:text-white text-gray-900">
+          <div className="my-3 mx-4">
+            <Button
+              onClick={() => router.push('/')}
+              startIcon={<ReplyIcon />}
+              className="!hidden  sm:!inline-flex"
+              variant="outlined"
+            >
+              Back
+            </Button>
+          </div>
           <CardHeader
             title={
-              <Typography variant="h4" className="text-center font-bold">
+              <Typography variant="h4" className="text-center font-bold dark:text-white text-gray-900">
                 {existingProfile?._id ? "Edit Profile" : "Create Profile"}
               </Typography>
             }
@@ -119,7 +127,7 @@ const EditProfile = () => {
               <TextFieldController control={control} name="name" label="Full Name" placeholder="Enter your full name" />
               <TextFieldController control={control} name="phoneNo" label="Phone Number" placeholder="Enter your phone number" type="tel" />
               <TextFieldController control={control} name="address" label="Address" placeholder="Enter your address" />
-              <DateFieldController control={control} name="dob" label="Date of Birth" placeholder="Enter your date of birth" type="date" />
+              <DateFieldController control={control} name="dob" label="Date of Birth" />
               <SelectFieldController control={control} name="gender" label="Gender" options={genderOptions} />
               <TextareaController control={control} name="bio" label="Bio" placeholder="Tell us about yourself" />
               <SocialMediaFieldController control={control} name="youtube" label="YouTube" placeholder="Enter your YouTube handle" />
