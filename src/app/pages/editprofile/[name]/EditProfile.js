@@ -49,10 +49,11 @@ const EditProfile = () => {
     { value: 'Other', label: 'Other' },
   ], []);
 
-  const { control, handleSubmit, setValue, reset } = useForm({
+  const { control, handleSubmit, setValue, reset ,formState:{isSubmitting,errors}} = useForm({
     defaultValues,
     resolver: zodResolver(profileSchema),
   });
+  console.log('errros',errors)
 
   useEffect(() => {
     if (existingProfile) {
@@ -76,9 +77,6 @@ const EditProfile = () => {
       userId: user._id,
     };
 
-    console.log("User Context:", user);
-    console.log("Profile Data Sent:", profileData);
-
     try {
       if (existingProfile?._id) {
         await updateProfile({ id: existingProfile._id, ...profileData });
@@ -96,7 +94,6 @@ const EditProfile = () => {
     }
   };
 
-  // Optional: Wait for user context to load before rendering form
   if (!user?._id) {
     return (
       <Container maxWidth="md" className="py-8">
