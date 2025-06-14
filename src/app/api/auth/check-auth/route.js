@@ -6,8 +6,9 @@ import { cookies } from 'next/headers';
 
 export async function GET() {
     await connectDB();
+
     try {
-        const cookieStore = await cookies();  
+        const cookieStore = await cookies();
         const token = cookieStore.get('token')?.value;
 
         if (!token) {
@@ -23,6 +24,7 @@ export async function GET() {
 
         return NextResponse.json({ isLoggedIn: true, user }, { status: 200 });
     } catch (err) {
+        console.error("Check-auth error:", err);
         return NextResponse.json({ isLoggedIn: false }, { status: 500 });
     }
 }
