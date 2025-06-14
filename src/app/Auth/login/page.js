@@ -11,14 +11,15 @@ import { LoginSchema } from '../schemas/Schemas';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/app/hooks/User';
 
 const LoginForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const redirect = useMemo(() => searchParams.get('redirect') || '/', [searchParams]);
 
   const [isLoading, setIsLoading] = useState(false);
+  const { mutate } = useAuth();
 
   const {
     control,
@@ -36,17 +37,20 @@ const LoginForm = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`/api/auth/login`, {
-        email: data.email,
-        password: data.password,
-      }, {
-        withCredentials: true,
-      });
+      const response = await axios.post(
+        `/api/auth/login`,
+        {
+          email: data.email,
+          password: data.password,
+        },
+        { withCredentials: true }
+      );
 
       if (response.status === 200) {
-        router.push(redirect);
+        await mutate();
         toast.success('Login successfully');
         reset();
+        router.push(redirect); 
       }
     } catch (error) {
       if (error.response) {
@@ -73,10 +77,7 @@ const LoginForm = () => {
     >
       <Container maxWidth="sm">
         <MotionDiv variants={slideInUp}>
-          <Box
-            className="bg-white p-8 rounded-lg shadow-lg"
-            sx={{ border: 1, borderColor: 'divider' }}
-          >
+          <Box className="bg-white p-8 rounded-lg shadow-lg" sx={{ border: 1, borderColor: 'divider' }}>
             <MotionDiv variants={slideInUp} className="text-center">
               <LockOutlined className="text-blue-500 text-4xl mb-4" />
               <Typography

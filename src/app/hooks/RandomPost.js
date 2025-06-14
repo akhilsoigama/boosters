@@ -29,12 +29,14 @@ export const useRandomPosts = () => {
   const [likesCount, setLikesCount] = useState({});
 
   const uniqueRandomPosts = useMemo(() => {
-    if (!data) return [];
+    if (!Array.isArray(data)) return [];
+  
     const postMap = new Map();
     data.forEach((post) => postMap.set(post._id, post));
     const uniquePosts = shuffleArray(Array.from(postMap.values()));
     return uniquePosts;
   }, [data]);
+  
 
   const refreshPosts = useCallback(async () => {
     try {

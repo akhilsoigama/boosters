@@ -1,154 +1,199 @@
 'use client';
-import { usePost } from '@/app/contaxt/PostContaxt';
-import { Modal, Box, TextField, Button, Typography, Avatar } from '@mui/material';
+
+import {
+  Modal,
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Avatar,
+  IconButton,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { usePost } from '@/app/contaxt/PostContaxt';
 import { useUser } from '@/app/contaxt/userContaxt';
-import axios from 'axios';
+import { useProfiles } from '@/app/hooks/Profile';
+import {
+  useComments,
+  useCommentCount,
+  useAddComment,
+  useUpdateComment,
+  useDeleteComment,
+} from '@/app/hooks/Comments';
 
-const CommentModal = ({ open, handleClose, selectedPost }) => {
-  const [newComment, setNewComment] = useState('');
-  const [comments, setComments] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Check';
+import CancelIcon from '@mui/icons-material/Close';
+
+const CommentModal = ({ open, handleClose, selectedPost, setCommentCount }) => {
   const { socketRef } = usePost();
   const { user } = useUser();
+  const { profiles } = useProfiles();
 
-  const fetchComments = async () => {
-    try {
-      if (!selectedPost?._id) return;
-      
-      setIsLoading(true);
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API}/comment/${selectedPost._id}`);
-      
-      const commentsData = response.data || [];
-      
-      setComments(commentsData.map(comment => ({
-        ...comment,
-        text: comment.comment,
-        likes: comment.likes || []
-      })));
-    } catch (error) {
-      if (error.response?.status !== 404) {
-        toast.error('Failed to load comments');
-        console.error('Error fetching comments:', error);
-      }
-      setComments([]); 
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [newComment, setNewComment] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editingText, setEditingText] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { comments, mutate, isLoading } = useComments(selectedPost?._id);
+  const { count, isLoading: isCountLoading } = useCommentCount(selectedPost?._id);
+  const { addComment } = useAddComment();
+  const { updateComment } = useUpdateComment();
+  const { deleteComment } = useDeleteComment();
+
+  useEffect(() => {
+    setCommentCount?.(count ?? 0);
+  }, [count]);
+
+  useEffect(() => {
+    const handleCommentUpdate = () => mutate();
+    socketRef.current?.on("refresh-comments", handleCommentUpdate);
+    return () => {
+      socketRef.current?.off("refresh-comments", handleCommentUpdate);
+    };
+  }, [mutate, socketRef]);
 
   const handleSubmitComment = async () => {
-    if (!newComment.trim() || !selectedPost?._id || !user?._id) return;
+    if (!newComment.trim() || !selectedPost?._id || !user?._id || isSubmitting) return;
 
+    setIsSubmitting(true);
     try {
       const commentData = {
         postId: selectedPost._id,
         comment: newComment,
         userId: user._id,
-        userName: user.fullName || "Anonymous"
+        userName: user.fullName || 'Anonymous',
       };
 
+      await addComment(commentData);
       socketRef.current?.emit('comment-post', commentData);
 
-      toast.success('Comment sent!');
+      toast.success('Comment added!');
       setNewComment('');
-    } catch (error) {
+      mutate();
+    } catch (err) {
       toast.error('Failed to post comment');
-      console.error('Error submitting comment:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  useEffect(() => {
-    if (!open || !selectedPost?._id) return;
+  const handleEdit = (comment) => {
+    setEditingId(comment._id);
+    setEditingText(comment.content || '');
+  };
 
-    const socket = socketRef.current;
-    if (!socket) return;
+  const handleSaveEdit = async (id) => {
+    try {
+      await updateComment({ commentId: id, content: editingText });
+      toast.success('Comment updated');
+      setEditingId(null);
+      setEditingText('');
+      mutate();
+    } catch (err) {
+      toast.error('Failed to update comment');
+    }
+  };
 
-    const handleNewComment = (comment) => {
-      if (comment.postId === selectedPost._id) {
-        setComments(prev => [...prev, {
-          ...comment,
-          text: comment.comment,
-          likes: comment.likes || []
-        }]);
-      }
-    };
-
-    const handleCommentLiked = (data) => {
-      setComments(prev => prev.map(c => 
-        c._id === data.commentId 
-          ? { ...c, likes: data.likes || [] } 
-          : c
-      ));
-    };
-
-    socket.on('post-commented', handleNewComment);
-    socket.on('post-liked', handleCommentLiked);
-
-    fetchComments();
-
-    return () => {
-      socket.off('post-commented', handleNewComment);
-      socket.off('post-liked', handleCommentLiked);
-    };
-  }, [open, selectedPost?._id]); 
-
+  const handleDelete = async (id) => {
+    try {
+      await deleteComment(id);
+      toast.success('Comment deleted');
+      mutate();
+    } catch (err) {
+      toast.error('Failed to delete comment');
+    }
+  };
 
   const handleLikeComment = async (commentId) => {
-    try {
-      toast.info('Like functionality to be implemented');
-    } catch (error) {
-      toast.error('Failed to like comment');
-    }
+    toast.info('Like functionality coming soon!');
   };
-
-  if (!selectedPost) return null;
-
-  const filteredComments = comments.filter(c => c.postId === selectedPost._id);
 
   return (
     <Modal open={open} onClose={handleClose}>
       <Box className="bg-white dark:bg-gray-900 w-full sm:w-[500px] mx-auto mt-32 rounded-xl overflow-hidden flex flex-col h-[70vh]">
         <Box className="p-4 border-b border-gray-300 dark:border-gray-700 text-center font-semibold text-lg">
-          Comments ({filteredComments.length})
+          Comments ({isCountLoading ? '...' : count ?? 0})
         </Box>
 
         <Box className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-4">
           {isLoading ? (
-            <Typography className="text-gray-500 dark:text-gray-400 text-center py-4">
+            <Typography className="text-gray-500 text-center py-4">
               Loading comments...
             </Typography>
-          ) : filteredComments.length > 0 ? (
-            filteredComments.map((comment) => (
-              <Box key={comment._id} className="flex items-start space-x-3">
-                <Avatar sx={{ width: 32, height: 32 }}>
-                  {comment.userName?.charAt(0).toUpperCase() || 'U'}
-                </Avatar>
-                <Box className="flex-1">
-                  <Typography variant="subtitle2" className="font-semibold">
-                    {comment.userName || 'Anonymous'}
-                  </Typography>
-                  <Typography variant="body2" className="text-gray-600 dark:text-gray-300">
-                    {comment.text || comment.comment}
-                  </Typography>
-                  <Box className="flex items-center  mt-1 space-x-4">
-                    <Typography variant="caption" className="text-gray-500">
-                      {new Date(comment.createdAt).toLocaleString()}
+          ) : comments?.length > 0 ? (
+            comments.map((comment) => {
+              const profile = profiles?.find(p => p.userId?._id === comment.userId);
+              const isAuthor = user?._id === comment.userId;
+
+              return (
+                <Box key={comment._id} className="flex items-start space-x-3">
+                  <Avatar sx={{ width: 32, height: 32 }} src={profile?.avatar || ''}>
+                    {(!profile?.avatar && (profile?.name || comment.userName)?.charAt(0).toUpperCase()) || 'U'}
+                  </Avatar>
+                  <Box className="flex-1">
+                    <Typography variant="subtitle2" className="font-semibold">
+                      {profile?.name || comment.userName || 'Anonymous'}
                     </Typography>
-                    <Button 
-                      size="small" 
-                      className="text-gray-500"
-                      onClick={() => handleLikeComment(comment._id)}
-                    >
-                      Like ({comment.likes?.length || 0})
-                    </Button>
+
+                    {editingId === comment._id ? (
+                      <TextField
+                        value={editingText}
+                        onChange={(e) => setEditingText(e.target.value)}
+                        fullWidth
+                        variant="standard"
+                        multiline
+                      />
+                    ) : (
+                      <Typography variant="body2" className="text-gray-600 dark:text-gray-300">
+                        {comment.content}
+                      </Typography>
+                    )}
+
+                    <Box className="flex items-center mt-1 space-x-4">
+                      <Typography variant="caption" className="text-gray-500">
+                        {new Date(comment.createdAt).toLocaleString()}
+                      </Typography>
+                      <Button
+                        size="small"
+                        className="text-gray-500"
+                        onClick={() => handleLikeComment(comment._id)}
+                      >
+                        Like ({comment.likes?.length || 0})
+                      </Button>
+
+                      {isAuthor && (
+                        <>
+                          {editingId === comment._id ? (
+                            <>
+                              <IconButton size="small" onClick={() => handleSaveEdit(comment._id)} aria-label="save">
+                                <SaveIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton size="small" onClick={() => setEditingId(null)} aria-label="cancel">
+                                <CancelIcon fontSize="small" />
+                              </IconButton>
+                            </>
+                          ) : (
+                            <>
+                              <IconButton size="small" onClick={() => handleEdit(comment)} aria-label="edit">
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton size="small" onClick={() => handleDelete(comment._id)} aria-label="delete">
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </Box>
                   </Box>
                 </Box>
-              </Box>
-            ))
+              );
+            })
           ) : (
-            <Typography className="text-gray-500 dark:text-gray-400 text-center py-4">
+            <Typography className="text-gray-500 text-center py-4">
               No comments yet. Be the first to comment!
             </Typography>
           )}
@@ -164,15 +209,15 @@ const CommentModal = ({ open, handleClose, selectedPost }) => {
             onKeyPress={(e) => e.key === 'Enter' && handleSubmitComment()}
             InputProps={{
               disableUnderline: true,
-              className: "dark:text-white"
+              className: 'dark:text-white',
             }}
           />
           <Button
             onClick={handleSubmitComment}
-            disabled={!newComment.trim()}
+            disabled={!newComment.trim() || isSubmitting}
             className="ml-2 text-blue-500 font-semibold capitalize"
           >
-            Post
+            {isSubmitting ? 'Posting...' : 'Post'}
           </Button>
         </Box>
       </Box>

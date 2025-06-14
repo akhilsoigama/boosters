@@ -86,6 +86,6 @@ export function usePosts() {
     createPost,
     updatePost,
     deletePost,
-    getPostById, // ✅ Don't forget to include this
+    getPostById, 
   }), [data, error, isValidating, refreshPosts, mutate]);
 }
