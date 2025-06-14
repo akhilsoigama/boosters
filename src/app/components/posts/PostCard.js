@@ -17,7 +17,7 @@ import { useMemo, useState } from "react";
 import { usePost } from "@/app/contaxt/PostContaxt";
 import MarkdownPreview from "@/app/pages/common/MarkdownPreview";
 import CommentModal from "./CommentModel";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useUser } from "@/app/contaxt/userContaxt";
 import {
   DropdownMenu,
@@ -27,11 +27,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import axios from "axios";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { mutate } from "swr";
 import { useProfiles } from "@/app/hooks/Profile";
-import { differenceInHours, differenceInDays, differenceInMonths, differenceInYears, parseISO, differenceInMinutes, differenceInSeconds } from "date-fns";
+import {
+  differenceInHours,
+  differenceInDays,
+  differenceInMonths,
+  differenceInYears,
+  parseISO,
+} from "date-fns";
 
 const PostCard = ({ post, liked, likeCount, commentCount }) => {
   const { handleLikeToggle } = usePost();
@@ -40,16 +45,21 @@ const PostCard = ({ post, liked, likeCount, commentCount }) => {
   const { user } = useUser();
   const router = useRouter();
 
-  const { profiles } = useProfiles(); 
+  // 🔧 Initialize comment count from props or post
+  const [commentCountState, setCommentCountState] = useState(
+    commentCount || post.commentCount || 0
+  );
 
+  const { profiles } = useProfiles();
   const userId = useMemo(() => (user ? user._id : ""), [user]);
   const isSpecificRoute = pathname === `/profile/${userId}`;
 
   const matchedProfile = profiles?.find(
     (p) => p.userId?._id === post.User_id?._id
   );
-  console.log(matchedProfile)
-  const displayName = matchedProfile?.name || post.User_id?.fullName || "Unknown User";
+
+  const displayName =
+    matchedProfile?.name || post.User_id?.fullName || "Unknown User";
   const displayEmail = matchedProfile?.email || post.User_id?.email || "";
   const avatarSrc = matchedProfile?.avatar || null;
   const userInitial = displayName.charAt(0).toUpperCase();
@@ -63,41 +73,39 @@ const PostCard = ({ post, liked, likeCount, commentCount }) => {
       toast.error(err?.response?.data?.message || "Failed to delete post");
     }
   };
+
   const getTimeAgo = (createdAt) => {
     if (!createdAt) return "Unknown";
-  
     try {
       const date = parseISO(createdAt);
       const now = new Date();
-  
+
       const years = differenceInYears(now, date);
       if (years > 0) return `${years}y`;
-  
+
       const months = differenceInMonths(now, date);
       if (months > 0) return `${months}mo`;
-  
+
       const days = differenceInDays(now, date);
       if (days > 0) return `${days}d`;
-  
+
       const hours = differenceInHours(now, date);
       if (hours > 0) return `${hours}h`;
-  
+
       const minutes = Math.floor((now - date) / (1000 * 60));
       if (minutes > 0) return `${minutes}m`;
-  
+
       const seconds = Math.floor((now - date) / 1000);
       if (seconds > 0) return `${seconds}s`;
-  
+
       return "Just now";
     } catch (error) {
       return "Invalid date";
     }
   };
-  
-  
-  
+
   const createdAt = getTimeAgo(post.createdAt);
-  
+
   return (
     <>
       <Card className="shadow-xl bg-gradient-to-br from-white via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-indigo-950 dark:to-gray-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-indigo-900 transition-shadow duration-100">
@@ -135,10 +143,12 @@ const PostCard = ({ post, liked, likeCount, commentCount }) => {
                     </IconButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem onClick={(e) => {
-                      e.preventDefault();
-                      router.push(`/pages/createPost/${post._id}`);
-                    }}>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.preventDefault();
+                        router.push(`/pages/createPost/${post._id}`);
+                      }}
+                    >
                       Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleDelete(post._id)}>
@@ -185,13 +195,11 @@ const PostCard = ({ post, liked, likeCount, commentCount }) => {
               <CommentIcon />
             </IconButton>
             <span className="text-sm font-medium text-gray-700 dark:text-indigo-300">
-              {commentCount}
+              {commentCountState || commentCount || 0}
             </span>
           </div>
 
-          <IconButton
-            className="text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-full p-2"
-          >
+          <IconButton className="text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-full p-2">
             <Share />
           </IconButton>
         </CardActions>
@@ -201,6 +209,7 @@ const PostCard = ({ post, liked, likeCount, commentCount }) => {
         open={openModal}
         handleClose={() => setOpenModal(false)}
         selectedPost={post}
+        setCommentCount={setCommentCountState}
       />
     </>
   );
