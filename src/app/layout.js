@@ -5,6 +5,7 @@ import { ThemeProvider } from "./components/Darkmode/ThemeProvider";
 import { UserProvider } from "./contaxt/userContaxt";
 import { PostProvider } from "./contaxt/PostContaxt";
 import SWRProvider from "./SWRConfig";
+import { PostsCacheProvider } from "./contaxt/PostsCacheContext";
 
 
 const geistSans = Geist({
@@ -89,9 +90,11 @@ export default function RootLayout({ children }) {
                 duration: 3000,
               }} />
             <UserProvider>
-              <PostProvider>
-                {children}
-              </PostProvider>
+              <PostsCacheProvider>
+                <PostProvider>
+                  {children}
+                </PostProvider>
+              </PostsCacheProvider>
             </UserProvider>
           </ThemeProvider>
         </SWRProvider>
