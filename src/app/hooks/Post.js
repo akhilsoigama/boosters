@@ -6,7 +6,7 @@ import { toast } from "sonner";
 const fetcher = async (url) => {
   try {
     const { data } = await axios.get(url, {
-      params: { limit: 20 },
+      params: { limit: 5 },
       headers: {
         'Cache-Control': 'public, max-age=60, stale-while-revalidate=30'
       }
