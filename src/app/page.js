@@ -5,12 +5,12 @@ import Sidebar from "./components/Sidebar";
 export default function Home() {
 
   return (
-      <div className="">
+      <main className="">
         
         <Logo />
         <Sidebar />
         <HomePage/>
         <BottomNavbar />
-      </div>
+      </main>
   );
 }

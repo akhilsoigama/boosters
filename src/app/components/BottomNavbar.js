@@ -30,7 +30,7 @@ const BottomNavbar = () => {
       variants={fadeIn}
       initial="hidden"
       animate="visible"
-      className="fixed bottom-0 w-full shadow-md backdrop-blur-md  transition-all duration-300 md:hidden z-50"
+      className="fixed bg-slate-50 bottom-0 w-full shadow-md backdrop-blur-sm  transition-all duration-300 md:hidden z-50"
     >
       <motion.div
         variants={slideInLeft}
