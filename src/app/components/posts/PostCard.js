@@ -249,8 +249,8 @@ const PostCard = ({ post, liked, likeCount, commentCount, isLoading }) => {
       <ShareModal
         open={shareOpen}
         handleClose={() => setShareOpen(false)}
-        shareLink={`https://boosters-sooty.vercel.app/post/${post._id}`}
-      />
+        postId={post._id}
+        />
 
       {/* Delete Confirmation Dialog */}
       <Dialog
