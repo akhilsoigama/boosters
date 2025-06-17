@@ -106,7 +106,7 @@ const EditProfile = () => {
         <Card className="shadow-lg dark:bg-gray-900 bg-white dark:text-white text-gray-900">
           <div className="my-3 mx-4">
             <Button
-              onClick={() => router.push('/')}
+              onClick={() => router.back()}
               startIcon={<ReplyIcon />}
               className="!hidden  sm:!inline-flex"
               variant="outlined"

@@ -8,6 +8,7 @@ import {
   Typography,
   Avatar,
   IconButton,
+  useTheme,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -110,7 +111,7 @@ const CommentModal = ({ open, handleClose, selectedPost, setCommentCount }) => {
   const handleLikeComment = async (commentId) => {
     toast.info('Like functionality coming soon!');
   };
-
+  const theme = useTheme()
   return (
     <Modal open={open} onClose={handleClose}>
       <Box className="bg-white dark:bg-gray-900 w-full sm:w-[500px] mx-auto mt-32 rounded-xl overflow-hidden flex flex-col h-[70vh]">
@@ -145,9 +146,14 @@ const CommentModal = ({ open, handleClose, selectedPost, setCommentCount }) => {
                         fullWidth
                         variant="standard"
                         multiline
+                        sx={{
+                          '& .MuiInputBase-input': {
+                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                          },
+                        }}
                       />
                     ) : (
-                      <Typography variant="body2" className="text-gray-600 dark:text-gray-300">
+                      <Typography variant="body2" className="text-white">
                         {comment.content}
                       </Typography>
                     )}
@@ -169,19 +175,19 @@ const CommentModal = ({ open, handleClose, selectedPost, setCommentCount }) => {
                           {editingId === comment._id ? (
                             <>
                               <IconButton size="small" onClick={() => handleSaveEdit(comment._id)} aria-label="save">
-                                <SaveIcon fontSize="small" />
+                                <SaveIcon fontSize="small" className='dark:text-white' />
                               </IconButton>
                               <IconButton size="small" onClick={() => setEditingId(null)} aria-label="cancel">
-                                <CancelIcon fontSize="small" />
+                                <CancelIcon fontSize="small" className='dark:text-white' />
                               </IconButton>
                             </>
                           ) : (
                             <>
                               <IconButton size="small" onClick={() => handleEdit(comment)} aria-label="edit">
-                                <EditIcon fontSize="small" />
+                                <EditIcon fontSize="small" className='dark:text-white' />
                               </IconButton>
                               <IconButton size="small" onClick={() => handleDelete(comment._id)} aria-label="delete">
-                                <DeleteIcon fontSize="small" />
+                                <DeleteIcon fontSize="small" className='dark:text-white' />
                               </IconButton>
                             </>
                           )}
