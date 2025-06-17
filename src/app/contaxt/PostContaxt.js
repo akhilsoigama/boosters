@@ -7,20 +7,22 @@ import {
   useCallback,
   useRef,
   useEffect,
+  useMemo,
 } from 'react';
 import { io } from 'socket.io-client';
+import axios from 'axios';
+import { usePostsCache } from './PostsCacheContext';
 import { usePosts } from '../hooks/Post';
 import { useUser } from './userContaxt';
-import { useToggleLike } from '../hooks/Comments';
 
 const PostContext = createContext();
 
 export const PostProvider = ({ children }) => {
-  const { posts, isLoading, mutate } = usePosts();
-  const { toggleLike } = useToggleLike();
-  const {user } = useUser(); 
-  const userId = user?._id;
+  const { posts, isLoading, isValidating, mutate } = usePosts();
+  const { user } = useUser();
+  const { getFromCache, setToCache } = usePostsCache();
 
+  const [initialLoad, setInitialLoad] = useState(true);
   const [visiblePosts, setVisiblePosts] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [likedPosts, setLikedPosts] = useState({});
@@ -32,6 +34,7 @@ export const PostProvider = ({ children }) => {
   const observer = useRef();
   const socketRef = useRef();
 
+  // ✅ Fix: socket setup without 'posts' in deps
   useEffect(() => {
     if (!socketRef.current) {
       socketRef.current = io(process.env.NEXT_PUBLIC_API, {
@@ -39,7 +42,7 @@ export const PostProvider = ({ children }) => {
       });
 
       socketRef.current.on('post-liked', ({ postId }) => {
-        mutate(); // refresh posts data
+        mutate(); // or mutate(postId) if you optimize usePosts for single-post updates
       });
 
       socketRef.current.on('post-unliked', ({ postId }) => {
@@ -61,61 +64,92 @@ export const PostProvider = ({ children }) => {
   }, [mutate]);
 
   useEffect(() => {
-    if (posts.length > 0) {
+    if (!initialLoad || posts.length === 0) return;
+  
+    const cacheKey = `posts-${user?._id || 'all'}`;
+    const cachedPosts = getFromCache(cacheKey);
+  
+    if (cachedPosts) {
+      setVisiblePosts(cachedPosts.slice(0, loadCount));
+    } else {
       const uniquePosts = Array.from(new Map(posts.map(p => [p._id, p])).values());
       setVisiblePosts(uniquePosts.slice(0, loadCount));
-
+      setToCache(cacheKey, uniquePosts);
+  
       const initialLikes = {};
+      const initialLikesCount = {};
+  
       uniquePosts.forEach((p) => {
-        initialLikes[p._id] = p.likes || 0;
+        initialLikes[p._id] = p.likes?.includes(user?._id) || false;
+        initialLikesCount[p._id] = p.likes?.length || 0;
       });
-      setLikesCount(initialLikes);
+  
+      setLikedPosts(initialLikes);
+      setLikesCount(initialLikesCount);
     }
-  }, [posts]);
+  
+    setInitialLoad(false); // ✅ Only after we’ve loaded or tried to load
+  }, [initialLoad, posts, user, getFromCache, setToCache]);
+  
 
-  // 👉 Intersection observer for infinite scroll
   const lastPostRef = useCallback(
     (node) => {
-      if (isLoading) return;
+      if (isLoading || isValidating) return;
       if (observer.current) observer.current.disconnect();
+
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore) {
           loadMorePosts();
         }
-      });
+      }, { threshold: 0.1 });
+
       if (node) observer.current.observe(node);
     },
-    [isLoading, hasMore]
+    [isLoading, isValidating, hasMore]
   );
 
-  const loadMorePosts = () => {
+  const loadMorePosts = useCallback(() => {
+    if (isLoading || !hasMore) return;
+
     const currentLength = visiblePosts.length;
     const nextPosts = posts.slice(currentLength, currentLength + loadCount);
-    const updatedPosts = [...visiblePosts, ...nextPosts];
-    const uniquePosts = Array.from(new Map(updatedPosts.map(p => [p._id, p])).values());
-    setVisiblePosts(uniquePosts);
-    if (uniquePosts.length >= posts.length) setHasMore(false);
-  };
 
-  // 👉 Like toggle with optimistic UI + backend call + server emit
+    if (nextPosts.length > 0) {
+      setVisiblePosts(prev => {
+        const newPosts = [...prev, ...nextPosts];
+        return Array.from(new Map(newPosts.map(p => [p._id, p])).values());
+      });
+    } else {
+      setHasMore(false);
+    }
+  }, [isLoading, hasMore, posts, visiblePosts]);
+
   const handleLikeToggle = async (postId) => {
-    if (!userId) return;
+    if (!user?._id) return;
 
-    setLikedPosts((prev) => ({
-      ...prev,
-      [postId]: !prev[postId],
-    }));
+    const newLikedState = !likedPosts[postId];
 
-    setLikesCount((prev) => ({
+    // Optimistic UI update
+    setLikedPosts(prev => ({ ...prev, [postId]: newLikedState }));
+    setLikesCount(prev => ({
       ...prev,
-      [postId]: prev[postId] + (likedPosts[postId] ? -1 : 1),
+      [postId]: (prev[postId] || 0) + (newLikedState ? 1 : -1),
     }));
 
     try {
-      await toggleLike({ postId, userId }); // actual backend call
-      mutate(); // revalidate posts
+      await axios.post(`/api/posts/${postId}/like`, {
+        userId: user._id,
+        like: newLikedState
+      });
+      mutate();
     } catch (error) {
       console.error('Toggle like failed:', error);
+      // Rollback
+      setLikedPosts(prev => ({ ...prev, [postId]: !newLikedState }));
+      setLikesCount(prev => ({
+        ...prev,
+        [postId]: (prev[postId] || 0) + (newLikedState ? -1 : 1),
+      }));
     }
   };
 
@@ -137,26 +171,40 @@ export const PostProvider = ({ children }) => {
     setOpenCommentModal(false);
   };
 
+  const value = useMemo(() => ({
+    posts,
+    visiblePosts,
+    isLoading: isLoading && initialLoad,
+    isValidating,
+    hasMore,
+    likedPosts,
+    likesCount,
+    lastPostRef,
+    handleLikeToggle,
+    handleOpenComment,
+    handleCloseComment,
+    openCommentModal,
+    selectedPost,
+    reshufflePosts,
+    mutate,
+    socketRef,
+  }), [
+    posts,
+    visiblePosts,
+    isLoading,
+    initialLoad,
+    isValidating,
+    hasMore,
+    likedPosts,
+    likesCount,
+    lastPostRef,
+    openCommentModal,
+    selectedPost,
+    mutate
+  ]);
+
   return (
-    <PostContext.Provider
-      value={{
-        posts,
-        visiblePosts,
-        isLoading,
-        hasMore,
-        likedPosts,
-        likesCount,
-        lastPostRef,
-        handleLikeToggle,
-        handleOpenComment,
-        handleCloseComment,
-        openCommentModal,
-        selectedPost,
-        reshufflePosts,
-        mutate,
-        socketRef,
-      }}
-    >
+    <PostContext.Provider value={value}>
       {children}
     </PostContext.Provider>
   );
