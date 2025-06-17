@@ -70,7 +70,7 @@ const PostForm = ({ postId }) => {
       {/* Back Button */}
       <div className="mb-6">
         <Button
-          onClick={() => router.push('/')}
+          onClick={() => router.back()}
           startIcon={<ReplyIcon />}
           className="!hidden sm:!inline-flex"
           variant="outlined"

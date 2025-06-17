@@ -77,7 +77,7 @@ const RandomPostsPage = () => {
         </Box>
       )}
     </div>
-  );
+  );  
 };
 
 export default RandomPostsPage;

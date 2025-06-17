@@ -1,53 +1,120 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import axios from "axios";
-import { Avatar, CircularProgress } from "@mui/material";
+
+import { useState, useEffect, useMemo } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useProfiles } from "@/app/hooks/Profile";
+import { useUser } from "@/app/contaxt/userContaxt";
+import { usePosts } from "@/app/hooks/Post";
+import { Avatar } from "@mui/material";
 import MarkdownPreview from "@/app/pages/common/MarkdownPreview";
-import { toast } from "sonner";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import SkeletonLoader from "../SkeletonLoader";
 
 const ViewPost = () => {
   const { postId } = useParams();
+  const router = useRouter();
+  const { profiles, isLoading: profilesLoading } = useProfiles();
+  const { getPostById } = usePosts();
+
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPost = async () => {
-      try {
-        const { data } = await axios.get(`/api/post/${postId}`);
-        setPost(data);
-      } catch (err) {
-        toast('Failed to fetch post')
-      } finally {
-        setLoading(false);
-      }
+      const result = await getPostById(postId);
+      if (result) setPost(result);
+      setLoading(false);
     };
-
     if (postId) fetchPost();
-  }, [postId]);
+  }, [postId, getPostById]);
 
-  if (loading) return <div className="flex justify-center py-10"><CircularProgress /></div>;
+  const matchedProfile = useMemo(() => {
+    return profiles?.find((p) => p.userId?._id === post?.userId);
+  }, [profiles, post]);
+
+  const displayName =
+    matchedProfile?.name || post?.user?.fullName || "Unknown User";
+  const avatarSrc = matchedProfile?.avatar || undefined;
+  const userInitial = displayName.charAt(0).toUpperCase();
+
+  if (loading || profilesLoading) {
+    return (
+      <div className="flex justify-center items-center h-[50vh] dark:bg-gray-950 bg-gray-50">
+        <SkeletonLoader />
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-2xl mx-auto p-6 shadow-lg mt-5 mb-5 bg-white dark:bg-gray-900 rounded-lg">
-      <div className="flex items-center gap-4 mb-4">
-        <Avatar
-          className="
-                bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 
-                dark:from-indigo-600 dark:via-purple-600 dark:to-pink-600 
-                shadow-lg ring-2 ring-offset-2 ring-indigo-300 dark:ring-indigo-700
-              "
-        >
-          {post.user?.fullName?.charAt(0).toUpperCase() || "U"}
-        </Avatar>
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white">{post?.user?.fullName || "Unknown User"}</h2>
-          <p className="text-sm text-gray-500">{post?.user?.email}</p>
+    <div className="min-h-screen  pb-20 bg-gray-50 dark:bg-gray-950 transition-colors">
+      <div className="max-w-3xl mx-auto px-4 py-6">
+        {/* Back Button */}
+        <div className="mb-4">
+          <Button
+            variant="ghost"
+            className="flex items-center mt-10 gap-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
         </div>
+
+        <Card className="rounded-2xl shadow-md dark:bg-gray-900 bg-white">
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <Avatar
+                src={avatarSrc}
+                alt={displayName}
+                sx={{
+                  width: 56,
+                  height: 56,
+                  bgcolor: avatarSrc ? "transparent" : "#673ab7",
+                  color: "#fff",
+                  fontWeight: "bold",
+                  fontSize: 22,
+                }}
+              >
+                {!avatarSrc && userInitial}
+              </Avatar>
+              <div>
+                <CardTitle className="text-lg text-gray-800 dark:text-white">
+                  {displayName}
+                </CardTitle>
+                <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
+                  {post?.user?.email}
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <h1 className="text-2xl font-semibold mb-4 text-center text-gray-900 dark:text-white">
+              {post?.title}
+            </h1>
+
+            {post?.image && (
+              <img
+                src={post.image}
+                alt={post.title}
+                className="w-full max-h-[400px] object-cover rounded-xl mb-6 shadow"
+              />
+            )}
+
+            <div className="prose dark:prose-invert max-w-none">
+              <MarkdownPreview content={post?.content} />
+            </div>
+          </CardContent>
+        </Card>
       </div>
-      <h1 className="text-2xl font-bold mb-3 text-gray-900 dark:text-gray-100">{post?.title}</h1>
-      {post?.image && <img src={post.image} alt={post.title} className="w-full rounded-lg mb-4 shadow" />}
-      <MarkdownPreview content={post?.content} />
     </div>
   );
 };

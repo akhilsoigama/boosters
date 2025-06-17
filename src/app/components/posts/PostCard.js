@@ -7,6 +7,12 @@ import {
   CardContent,
   CardActions,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
 } from '@mui/material';
 import {
   Favorite,
@@ -39,10 +45,15 @@ import {
   parseISO,
 } from 'date-fns';
 import SkeletonLoader from '../SkeletonLoader';
+import ShareModal from '../shareModel/ShareModel';
 
 const PostCard = ({ post, liked, likeCount, commentCount, isLoading }) => {
   const { handleLikeToggle } = usePost();
   const [openModal, setOpenModal] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
+
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useUser();
@@ -62,13 +73,21 @@ const PostCard = ({ post, liked, likeCount, commentCount, isLoading }) => {
   const avatarSrc = matchedProfile?.avatar || null;
   const userInitial = displayName.charAt(0).toUpperCase();
 
-  const handleDelete = async (id) => {
+  const confirmDelete = (id) => {
+    setDeleteTargetId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirmed = async () => {
     try {
-      await axios.delete(`/api/post/${id}`);
+      await axios.delete(`/api/post/${deleteTargetId}`);
       toast.success('Post deleted successfully!');
       mutate('/api/posts');
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Failed to delete post');
+    } finally {
+      setDeleteDialogOpen(false);
+      setDeleteTargetId(null);
     }
   };
 
@@ -115,8 +134,8 @@ const PostCard = ({ post, liked, likeCount, commentCount, isLoading }) => {
               <Avatar
                 src={avatarSrc || undefined}
                 className={`shadow-lg ring-1 ring-offset-1 ring-indigo-300 dark:ring-indigo-700 cursor-pointer ${avatarSrc
-                    ? ''
-                    : 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-600 dark:via-purple-600 dark:to-pink-600'
+                  ? ''
+                  : 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-600 dark:via-purple-600 dark:to-pink-600'
                   }`}
               >
                 {!avatarSrc && userInitial}
@@ -151,7 +170,15 @@ const PostCard = ({ post, liked, likeCount, commentCount, isLoading }) => {
                   >
                     Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleDelete(post._id)}>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.preventDefault();
+                      router.push(`/pages/${post._id}`);
+                    }}
+                  >
+                    View
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => confirmDelete(post._id)}>
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -201,18 +228,64 @@ const PostCard = ({ post, liked, likeCount, commentCount, isLoading }) => {
             </span>
           </div>
 
-          <IconButton className="text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-full p-2">
+          <IconButton
+            onClick={() => setShareOpen(true)}
+            className="text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-full p-2"
+          >
             <Share />
           </IconButton>
         </CardActions>
       </Card>
 
+      {/* Comment Modal */}
       <CommentModal
         open={openModal}
         handleClose={() => setOpenModal(false)}
         selectedPost={post}
         setCommentCount={setCommentCountState}
       />
+
+      {/* Share Modal */}
+      <ShareModal
+        open={shareOpen}
+        handleClose={() => setShareOpen(false)}
+        shareLink={`https://boosters-sooty.vercel.app/post/${post._id}`}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        PaperProps={{
+          className: 'rounded-xl dark:bg-gray-900 bg-white',
+          sx: { minWidth: 320 },
+        }}
+      >
+        <DialogTitle className="text-lg font-semibold dark:text-white text-gray-800">
+          Confirm Deletion
+        </DialogTitle>
+        <DialogContent>
+          <Typography className="text-sm dark:text-gray-300 text-gray-600">
+            Are you sure you want to delete this post? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions className="flex justify-end px-4 py-2">
+          <Button
+            onClick={() => setDeleteDialogOpen(false)}
+            className="text-gray-700 dark:text-gray-300"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteConfirmed}
+            color="error"
+            variant="contained"
+            className="text-white"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
