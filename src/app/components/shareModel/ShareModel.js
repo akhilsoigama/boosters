@@ -99,7 +99,7 @@ const staticOptions = [
 const ShareModal = ({ open, handleClose }) => {
   const { user } = useUser();
   const [showMore, setShowMore] = useState(false);
-  const shareLink = `https://boosters-sooty.vercel.app/${user?._id || 'guest'}`;
+  const shareLink = `https://boosters-sooty.vercel.app/pages/${user?._id || 'guest'}`;
 
   const handleAction = async (option) => {
     if (option.action === 'copy') {
