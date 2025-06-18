@@ -56,12 +56,12 @@ const ViewPost = () => {
   return (
     <div className="min-h-screen  pb-20 bg-gray-50 dark:bg-gray-950 transition-colors">
       <div className="max-w-3xl mx-auto px-4 py-6">
-        {/* Back Button */}
+       
         <div className="mb-4">
           <Button
             variant="ghost"
             className="flex items-center mt-10 gap-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-            onClick={() => router.back()}
+            onClick={() => router.back() || router.push('/')}
           >
             <ArrowLeft className="w-4 h-4" />
             Back
