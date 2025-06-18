@@ -1,233 +1,219 @@
 'use client';
+
 import React, { useState, useEffect, useRef } from 'react';
-import { Button, TextField } from '@mui/material';
+import { Button, TextField, IconButton } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import useSWRMutation from 'swr/mutation';
 import axios from 'axios';
+import MarkdownPreview from '@/app/pages/common/MarkdownPreview';
+import SendIcon from '@mui/icons-material/Send';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import Image from 'next/image';
 
-const fetcher = (url, { arg }) =>
-    axios.post(url, arg).then((res) => res.data);
+const fetcher = async (url, { arg }) => {
+    try {
+        const response = await axios.post(url, {
+            messages: [{ role: 'user', content: arg.message }],
+            model: 'deepseek/deepseek-chat:free',
+            temperature: 0.7,
+            max_tokens: 4096,
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.error?.message || 'Failed to fetch response');
+    }
+};
 
 const Chatbot = () => {
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
-    const [quizMode, setQuizMode] = useState(false);
-    const [currentQuestion, setCurrentQuestion] = useState(null);
     const messagesEndRef = useRef(null);
 
-    // SWR Mutations
-    const { trigger: sendMessage, isMutating: isLoading } = useSWRMutation(
-        'http://localhost:5000/chat',
-        fetcher
-    );
+    const { trigger: sendMessage, isMutating: isLoading } = useSWRMutation('/api/chatbot', fetcher);
 
-    const { trigger: fetchQuestion } = useSWRMutation(
-        'http://localhost:5000/random-kids-question',
-        fetcher
-    );
-
-    const { trigger: checkAnswer } = useSWRMutation(
-        'http://localhost:5000/check-answer',
-        fetcher
-    );
+    useEffect(() => {
+        setMessages([
+            { text: "👋 Hello! I'm your Boosters AI assistant. How can I help you today?", sender: 'bot' },
+        ]);
+    }, []);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        localStorage.setItem('chatMessages', JSON.stringify(messages));
     }, [messages]);
-
-    useEffect(() => {
-        if (messages.length === 0) {
-            setMessages([
-                {
-                    text: "Hello! I'm a smart bot. Ask me about programming or say 'quiz me' for kids' questions!",
-                    sender: 'bot',
-                },
-            ]);
-        }
-    }, []);
 
     const handleSendMessage = async () => {
         if (!inputValue.trim()) return;
-
         const userMessage = { text: inputValue, sender: 'user' };
-        setMessages((prev) => [...prev, userMessage]);
+        setMessages(prev => [...prev, userMessage]);
         setInputValue('');
 
         try {
-            if (inputValue.toLowerCase().includes('quiz me')) {
-                setQuizMode(true);
-                await getNewQuestion();
-            } else if (quizMode && currentQuestion) {
-                await verifyAnswer(inputValue);
+            const data = await sendMessage({ message: inputValue });
+            const reply = data?.choices?.[0]?.message?.content;
+            if (reply) {
+                setMessages(prev => [...prev, { text: reply, sender: 'bot' }]);
             } else {
-                const data = await sendMessage({ message: inputValue });
-                addBotMessage(data.response, data.image);
+                throw new Error('No response from AI');
             }
-        } catch {
-            addBotMessage("Sorry, I'm having trouble connecting to the server.");
+        } catch (error) {
+            setMessages(prev => [...prev, { text: error.message || 'Failed to connect to DeepSeek AI.', sender: 'bot' }]);
         }
     };
 
-    const getNewQuestion = async () => {
-        try {
-            const question = await fetchQuestion();
-            console.log(question)
-            setCurrentQuestion(question);
-            addBotMessage(question.question, question.image);
-        } catch {
-            addBotMessage('Failed to fetch a new question. Please try again.');
-        }
-    };
-
-    const verifyAnswer = async (answer) => {
-        try {
-            if (!currentQuestion) return;
-
-            const data = await checkAnswer({
-                question: currentQuestion.question,
-                answer,
-            });
-
-            if (data.correct) {
-                addBotMessage(`✅ Correct! ${currentQuestion.answer} is right!`, data.image);
-            } else {
-                addBotMessage(`❌ Not quite! The correct answer is: ${data.correct_answer}`, data.image);
-            }
-
-            await getNewQuestion();
-        } catch {
-            addBotMessage('Failed to check your answer. Please try again.');
-        }
-    };
-
-    const addBotMessage = (text, imageUrl = null) => {
-        const newMessage = { text, sender: 'bot' };
-        if (imageUrl) {
-            newMessage.image = imageUrl;
-        }
-        setMessages((prev) => [...prev, newMessage]);
-    };
-
-    const handleKeyPress = (e) => {
-        if (e.key === 'Enter') {
+    const handleKeyPress = e => {
+        if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
+            e.preventDefault();
             handleSendMessage();
         }
     };
 
     const messageVariants = {
-        hidden: { opacity: 0, y: 20 },
+        hidden: { opacity: 0, y: 10 },
         visible: { opacity: 1, y: 0 },
         exit: { opacity: 0 },
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col h-[600px] w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden"
-        >
-            <div className="flex justify-between items-center p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-                <motion.h2 className="text-xl font-bold" initial={{ x: -20 }} animate={{ x: 0 }}>
-                    Smart Bot
-                </motion.h2>
+        <div className="flex flex-col h-[84vh] bg-gray-50 dark:bg-gray-900">
+            {/* Header */}
+            <header className="flex items-center justify-between px-6 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center space-x-2">
+                    <Image
+                        src="/logo-transparent-svg.svg"
+                        alt="Booster"
+                        width={150}
+                        height={90}
+                        priority
+                    />
+                </div>
                 <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => {
-                        setMessages([]);
-                        localStorage.removeItem('chatMessages');
-                    }}
-                    className="shadow-md"
-                >
-                    Clear Chat
+                    variant="outlined"
+                    size="small"
+                    startIcon={<RefreshIcon fontSize="small" />}
+                    onClick={() => setMessages([{ text: "👋 Hello! I'm your DeepSeek AI assistant. How can I help you today?", sender: 'bot' }])}
+                >New Chat
                 </Button>
-            </div>
+            </header>
 
-            <div className="flex-1 p-4 overflow-y-auto scrollbar-hide bg-gray-50">
-                <AnimatePresence>
-                    {messages.map((message, index) => (
-                        <motion.div
-                            key={index}
-                            variants={messageVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="exit"
-                            transition={{ duration: 0.3 }}
-                            className={`mb-3 flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                            <div
-                                className={`max-w-xs md:max-w-md rounded-lg px-4 py-2 ${
-                                    message.sender === 'user'
-                                        ? 'bg-blue-500 text-white rounded-br-none'
-                                        : 'bg-gray-200 text-gray-800 rounded-bl-none'
-                                }`}
+            <div className="flex-1 overflow-y-auto px-4 py-6">
+                <div className="max-w-3xl mx-auto space-y-6">
+                    <AnimatePresence>
+                        {messages.map((message, index) => (
+                            <motion.div
+                                key={index}
+                                variants={messageVariants}
+                                initial="hidden"
+                                animate="visible"
+                                exit="exit"
+                                transition={{ duration: 0.25 }}
+                                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
-                                {message.text}
-                                {message.image && (
-                                    <div className="mt-2">
-                                        <img
-                                            src={message.image}
-                                            alt="Response visual"
-                                            className="rounded-lg max-w-full h-auto"
-                                            onError={(e) => {
-                                                e.target.style.display = 'none';
-                                            }}
-                                        />
+                                <div className={`max-w-[85%] max-h-[300px] overflow-y-auto px-4 py-3 rounded-lg ${message.sender === 'user'
+                                    ? ' rounded-br-none'
+                                    : ' dark:bg-gray-800 text-gray-800  border border-gray-200 dark:border-gray-600 rounded-bl-none shadow-sm'
+                                    }`}
+                                >
+                                    <div className="flex items-start space-x-2">
+                                        {message.sender === 'bot' && (
+                                            <div className="w-6 h-6  dark:bg-blue-900 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-300 mt-1 flex-shrink-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-4 h-4">
+                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+                                                </svg>
+                                            </div>
+                                        )}
+                                        <div className="overflow-x-auto break-words w-full">
+                                            <MarkdownPreview content={message?.text} />
+                                        </div>
                                     </div>
-                                )}
-                            </div>
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
 
-                {isLoading && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start mb-3">
-                        <div className="bg-gray-200 text-gray-800 rounded-lg rounded-bl-none px-4 py-2">
-                            <div className="flex space-x-1">
-                                {[...Array(3)].map((_, i) => (
-                                    <motion.div
-                                        key={i}
-                                        className="w-2 h-2 bg-gray-500 rounded-full"
-                                        animate={{ y: [0, -5, 0] }}
-                                        transition={{
-                                            repeat: Infinity,
-                                            duration: 1.2,
-                                            delay: i * 0.2,
-                                        }}
-                                    />
-                                ))}
+                    {isLoading && (
+                        <div className="flex justify-start">
+                            <div className="px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm rounded-bl-none max-w-[85%]">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-4 h-4">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+                                        </svg>
+                                    </div>
+                                    <div className="flex space-x-1">
+                                        {[...Array(3)].map((_, i) => (
+                                            <motion.div
+                                                key={i}
+                                                className="w-2 h-2 bg-gray-500 dark:bg-gray-300 rounded-full"
+                                                animate={{ y: [0, -4, 0] }}
+                                                transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </motion.div>
-                )}
-                <div ref={messagesEndRef} />
+                    )}
+
+                    <div ref={messagesEndRef} />
+                </div>
             </div>
 
-            <motion.div className="p-3 border-t border-gray-200 bg-white" layout>
-                <div className="flex gap-2">
-                    <TextField
-                        fullWidth
-                        variant="outlined"
-                        size="small"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        placeholder={quizMode ? 'Type your answer...' : 'Type your message...'}
-                        className="flex-1"
-                    />
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleSendMessage}
-                        disabled={isLoading}
-                        className="shadow-md"
-                    >
-                        {isLoading ? '...' : 'Send'}
-                    </Button>
+            {/* Input Area */}
+            <div className="px-4 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                <div className="max-w-3xl mx-auto">
+                    <div className="relative">
+                        <TextField
+                            fullWidth
+                            multiline
+                            maxRows={6}
+                            variant="outlined"
+                            placeholder="Message DeepSeek Chat..."
+                            value={inputValue}
+                            onChange={e => setInputValue(e.target.value)}
+                            onKeyDown={handleKeyPress}
+                            disabled={isLoading}
+                            InputProps={{
+                                sx: {
+                                    borderRadius: '12px',
+                                    paddingRight: '56px',
+                                    color: 'inherit',
+                                    '& input': {
+                                        color: 'inherit',
+                                    },
+                                    '& textarea': {
+                                        color: 'inherit',
+                                    },
+                                    '&:hover fieldset': { borderColor: 'rgb(59, 130, 246) !important' },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: 'rgb(59, 130, 246) !important',
+                                        boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.2)',
+                                    },
+                                },
+                            }}
+                        />
+                        <IconButton
+                            color="primary"
+                            disabled={isLoading || !inputValue.trim()}
+                            onClick={handleSendMessage}
+                            sx={{
+                                position: 'absolute',
+                                right: '8px',
+                                bottom: '8px',
+                                backgroundColor: 'rgb(59, 130, 246)',
+                                color: 'white',
+                                '&:hover': { backgroundColor: 'rgb(37, 99, 235)' },
+                                '&:disabled': { backgroundColor: 'rgb(191, 219, 254)' },
+                            }}
+                        >
+                            <SendIcon fontSize="small" />
+                        </IconButton>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+                       Boosters Chat can make mistakes. Consider checking important information.
+                    </p>
                 </div>
-            </motion.div>
-        </motion.div>
+            </div>
+        </div>
     );
 };
 
