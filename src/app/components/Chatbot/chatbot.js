@@ -121,7 +121,7 @@ const Chatbot = () => {
                                                 </svg>
                                             </div>
                                         )}
-                                        <div className="overflow-x-auto break-words w-full">
+                                        <div className="overflow-x-auto dark:text-white break-words w-full">
                                             <MarkdownPreview content={message?.text} />
                                         </div>
                                     </div>
@@ -132,7 +132,7 @@ const Chatbot = () => {
 
                     {isLoading && (
                         <div className="flex justify-start">
-                            <div className="px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm rounded-bl-none max-w-[85%]">
+                            <div className="px-4 py-3 dark:text-white bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm rounded-bl-none max-w-[85%]">
                                 <div className="flex items-center space-x-2">
                                     <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-300">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-4 h-4">
