@@ -8,8 +8,6 @@ export async function GET(req) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const limit = parseInt(searchParams.get('limit')) || 10;
-    const skip = parseInt(searchParams.get('skip')) || 0;
     const User_Id = searchParams.get('User_Id'); 
 
     let query = {};
@@ -19,8 +17,6 @@ export async function GET(req) {
 
     const posts = await Post.find(query)
       .populate('User_id', 'fullName email') 
-      .skip(skip)
-      .limit(limit);
 
     return NextResponse.json(posts, { status: 200 });
   } catch (error) {

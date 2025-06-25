@@ -6,7 +6,6 @@ import { toast } from "sonner";
 const fetcher = async (url) => {
   try {
     const { data } = await axios.get(url, {
-      params: { limit: 5 },
       headers: {
         'Cache-Control': 'public, max-age=60, stale-while-revalidate=30'
       }
@@ -17,12 +16,20 @@ const fetcher = async (url) => {
     throw error;
   }
 };
-
+const deduplicatePosts = (posts) => {
+  const seen = new Set();
+  return posts.filter(post => {
+    if (seen.has(post._id)) return false;
+    seen.add(post._id);
+    return true;
+  });
+};
 const shuffleArray = (array) => {
-  return array
+  const shuffled = array
     .map(value => ({ value, sort: Math.random() }))
     .sort((a, b) => a.sort - b.sort)
     .map(({ value }) => value);
+  return deduplicatePosts(shuffled);
 };
 
 export function usePosts() {
