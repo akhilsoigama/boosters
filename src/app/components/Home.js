@@ -21,7 +21,7 @@ const HomePage = () => {
   );
 
   return (
-    <div className="min-h-screen  pt-20 w-full flex justify-center bg-gradient-to-b dark:from-gray-950 dark:to-gray-950">
+    <div className="min-h-screen  pt-20 pb-10 w-full flex justify-center bg-gradient-to-b dark:from-gray-950 dark:to-gray-950">
       <div className="space-y-6 max-w-md lg:max-w-2xl grid grid-cols-1 place-items-center">
         {visiblePosts.map((post, i) => (
           <motion.div
