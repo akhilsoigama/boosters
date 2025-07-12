@@ -24,8 +24,6 @@ import {
 } from 'react-icons/fa';
 import { toast } from 'sonner';
 import { useState } from 'react';
-import { useUser } from '@/app/contaxt/userContaxt';
-import { usePosts } from '@/app/hooks/Post';
 
 const primaryOptions = [
   {
@@ -98,10 +96,8 @@ const staticOptions = [
 ];
 
 const ShareModal = ({ open, handleClose ,postId}) => {
-  const { posts } = usePosts();
   const [showMore, setShowMore] = useState(false);
   const shareLink = `https://boosters-sooty.vercel.app/pages/${postId || 'guest'}`;
-  console.log(posts)
   const handleAction = async (option) => {
     if (option.action === 'copy') {
       try {
