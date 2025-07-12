@@ -16,21 +16,6 @@ const fetcher = async (url) => {
     throw error;
   }
 };
-const deduplicatePosts = (posts) => {
-  const seen = new Set();
-  return posts.filter(post => {
-    if (seen.has(post._id)) return false;
-    seen.add(post._id);
-    return true;
-  });
-};
-const shuffleArray = (array) => {
-  const shuffled = array
-    .map(value => ({ value, sort: Math.random() }))
-    .sort((a, b) => a.sort - b.sort)
-    .map(({ value }) => value);
-  return deduplicatePosts(shuffled);
-};
 
 export function usePosts() {
   const {
@@ -94,11 +79,10 @@ export function usePosts() {
   };
 
   return useMemo(() => ({
-    posts: data ? shuffleArray(data) : [],
+    posts: data || [],
     postsError: error,
     isLoading: !data && !error,
     isValidating,
-    refreshPosts,
     createPost,
     updatePost,
     deletePost,
