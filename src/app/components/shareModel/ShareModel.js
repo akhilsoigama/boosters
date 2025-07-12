@@ -101,7 +101,6 @@ const ShareModal = ({ open, handleClose ,postId}) => {
   const { posts } = usePosts();
   const [showMore, setShowMore] = useState(false);
   const shareLink = `https://boosters-sooty.vercel.app/pages/${postId || 'guest'}`;
-  console.log(posts)
   const handleAction = async (option) => {
     if (option.action === 'copy') {
       try {
