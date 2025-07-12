@@ -7,7 +7,7 @@ import { useRandomPosts } from '@/app/hooks/RandomPost';
 import SkeletonLoader from '../SkeletonLoader';
 
 const RandomPostsPage = () => {
-  const { posts, isLoading, likedPosts, likesCount, toggleLike } = useRandomPosts();
+  const { posts, isLoading, likedPosts, likesCount} = useRandomPosts();
   const observerRef = useRef(null);
   const loadCount = 10;
 
@@ -37,12 +37,6 @@ const RandomPostsPage = () => {
     },
     [isLoading, posts, visiblePosts]
   );
-
-  const uniquePosts = useMemo(() => {
-    const postMap = new Map();
-    posts.forEach((post) => postMap.set(post._id, post));
-    return Array.from(postMap.values());
-  }, [posts]);
 
   return (
     <div className="container mx-auto px-4 py-8">

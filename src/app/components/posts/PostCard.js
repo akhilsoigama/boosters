@@ -127,7 +127,7 @@ const PostCard = ({ post, liked, likeCount, commentCount, isLoading }) => {
 
   return (
     <>
-      <Card className="shadow-xl bg-gradient-to-br from-white via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-indigo-950 dark:to-gray-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-indigo-900 transition-shadow duration-100">
+      <Card className="shadow-xl mb-10 bg-gradient-to-br from-white via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-indigo-950 dark:to-gray-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-indigo-900 transition-shadow duration-100">
         <CardHeader
           avatar={
             <Link href={`/profile/${post.User_id?._id}`}>
