@@ -24,7 +24,6 @@ export const PostProvider = ({ children }) => {
 
   const [initialLoad, setInitialLoad] = useState(true);
   const [visiblePosts, setVisiblePosts] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
   const [likedPosts, setLikedPosts] = useState({});
   const [likesCount, setLikesCount] = useState({});
   const [openCommentModal, setOpenCommentModal] = useState(false);
@@ -34,7 +33,6 @@ export const PostProvider = ({ children }) => {
   const observer = useRef();
   const socketRef = useRef();
 
-  // ✅ Fix: socket setup without 'posts' in deps
   useEffect(() => {
     if (!socketRef.current) {
       socketRef.current = io(process.env.NEXT_PUBLIC_API, {
@@ -42,7 +40,7 @@ export const PostProvider = ({ children }) => {
       });
 
       socketRef.current.on('post-liked', ({ postId }) => {
-        mutate(); // or mutate(postId) if you optimize usePosts for single-post updates
+        mutate(); 
       });
 
       socketRef.current.on('post-unliked', ({ postId }) => {
@@ -88,7 +86,7 @@ export const PostProvider = ({ children }) => {
       setLikesCount(initialLikesCount);
     }
   
-    setInitialLoad(false); // ✅ Only after we’ve loaded or tried to load
+    setInitialLoad(false); 
   }, [initialLoad, posts, user, getFromCache, setToCache]);
   
 
@@ -98,38 +96,37 @@ export const PostProvider = ({ children }) => {
       if (observer.current) observer.current.disconnect();
 
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
+        if (entries[0].isIntersecting ) {
           loadMorePosts();
         }
       }, { threshold: 0.1 });
 
       if (node) observer.current.observe(node);
     },
-    [isLoading, isValidating, hasMore]
+    [isLoading, isValidating]
   );
 
   const loadMorePosts = useCallback(() => {
-    if (isLoading || !hasMore) return;
-
+    if (isLoading) return;
+  
     const currentLength = visiblePosts.length;
     const nextPosts = posts.slice(currentLength, currentLength + loadCount);
-
+  
     if (nextPosts.length > 0) {
       setVisiblePosts(prev => {
-        const newPosts = [...prev, ...nextPosts];
-        return Array.from(new Map(newPosts.map(p => [p._id, p])).values());
+        const combined = [...prev, ...nextPosts];
+        const unique = Array.from(new Map(combined.map(p => [p._id, p])).values());
+        return unique;
       });
-    } else {
-      setHasMore(false);
     }
-  }, [isLoading, hasMore, posts, visiblePosts]);
+  }, [isLoading, posts, visiblePosts]);
+  
 
   const handleLikeToggle = async (postId) => {
     if (!user?._id) return;
 
     const newLikedState = !likedPosts[postId];
 
-    // Optimistic UI update
     setLikedPosts(prev => ({ ...prev, [postId]: newLikedState }));
     setLikesCount(prev => ({
       ...prev,
@@ -144,7 +141,6 @@ export const PostProvider = ({ children }) => {
       mutate();
     } catch (error) {
       console.error('Toggle like failed:', error);
-      // Rollback
       setLikedPosts(prev => ({ ...prev, [postId]: !newLikedState }));
       setLikesCount(prev => ({
         ...prev,
@@ -152,14 +148,6 @@ export const PostProvider = ({ children }) => {
       }));
     }
   };
-
-  const reshufflePosts = useCallback(() => {
-    if (posts.length > 0) {
-      const shuffled = [...posts].sort(() => Math.random() - 0.5);
-      setVisiblePosts(shuffled.slice(0, loadCount));
-      setHasMore(true);
-    }
-  }, [posts]);
 
   const handleOpenComment = (post) => {
     setSelectedPost(post);
@@ -176,7 +164,6 @@ export const PostProvider = ({ children }) => {
     visiblePosts,
     isLoading: isLoading && initialLoad,
     isValidating,
-    hasMore,
     likedPosts,
     likesCount,
     lastPostRef,
@@ -185,7 +172,6 @@ export const PostProvider = ({ children }) => {
     handleCloseComment,
     openCommentModal,
     selectedPost,
-    reshufflePosts,
     mutate,
     socketRef,
   }), [
@@ -194,7 +180,6 @@ export const PostProvider = ({ children }) => {
     isLoading,
     initialLoad,
     isValidating,
-    hasMore,
     likedPosts,
     likesCount,
     lastPostRef,
